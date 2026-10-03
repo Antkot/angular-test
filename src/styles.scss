@@ -31,7 +31,7 @@ html,
 body {
   margin: 0;
   min-height: 100%;
-  background: #1e1e1e;
+  background: #f3f4f6;
   color: var(--md-text);
   font-family:
     'Plus Jakarta Sans',
@@ -79,29 +79,84 @@ code {
   font-size: 12px;
 }
 
-/* 3. RAMKA APLIKACJI */
+/* 3. RAMKA APLIKACJI - mobile first, na PC rozciąga się na całą szerokość */
 .app-shell {
   position: relative;
   display: flex;
   flex-direction: column;
   width: 100%;
-  max-width: 420px;
   min-height: 100dvh;
-  margin: 0 auto;
   background: #ffffff;
 }
 
-/* Na PC aplikacja działa normalnie - kolumna telefonu wyśrodkowana na tle. */
 @media (min-width: 768px) {
-  body {
-    padding: 24px 0;
+  .page,
+  .topbar__inner {
+    width: 100%;
+    max-width: 1280px;
+    margin: 0 auto;
   }
 
-  .app-shell {
-    min-height: calc(100dvh - 48px);
-    border-radius: 24px;
-    box-shadow: 0 25px 60px -15px rgb(0 0 0 / 55%);
-    overflow: hidden;
+  .topbar {
+    padding: 0 24px;
+  }
+
+  .page {
+    padding: 24px 32px;
+  }
+
+  /* Formularze i wąskie ekrany nie rozciągają się na całość monitora */
+  .page--tight,
+  .page--narrow {
+    max-width: 720px;
+  }
+
+  /* Listy kart wielokolumnowe */
+  .stack {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+    gap: 16px;
+    align-content: start;
+  }
+
+  .stack--row {
+    display: flex;
+    flex-direction: column;
+  }
+
+  .account-grid {
+    grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+    max-width: 900px;
+  }
+
+  .choice-grid {
+    grid-template-columns: repeat(2, minmax(0, 300px));
+    justify-content: center;
+    padding-top: 32px;
+  }
+
+  .rows {
+    width: 100%;
+    max-width: 760px;
+    margin: 0 auto;
+  }
+
+  .search {
+    max-width: 720px;
+  }
+
+  .tag-filter {
+    max-width: 960px;
+  }
+
+  .fab {
+    right: 32px;
+    bottom: 32px;
+  }
+
+  .qr-frame canvas {
+    width: 280px;
+    height: 280px;
   }
 }
 
@@ -838,6 +893,103 @@ code {
   margin: 8px 0 32px;
   font-size: 20px;
   font-weight: 700;
+  text-align: center;
+}
+
+/* Wybór roly w formularzu konta */
+.role-picker {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px;
+}
+
+.role-option {
+  padding: 8px 12px;
+  border: 1px solid var(--md-border);
+  border-radius: var(--md-radius-sm);
+  background: #ffffff;
+  color: var(--md-text-light);
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+}
+
+.role-option.is-active {
+  border-color: var(--md-brand);
+  background: rgb(104 178 122 / 10%);
+  color: var(--md-text);
+}
+
+/* Wiersz z przełącznikiem (Ustawienia) */
+.switch-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  padding: 10px 0;
+  border-bottom: 1px solid var(--md-surface-2);
+  font-size: 13px;
+}
+
+.switch-row:last-child {
+  border-bottom: 0;
+}
+
+.switch-row input {
+  width: 16px;
+  height: 16px;
+  accent-color: var(--md-brand);
+  cursor: pointer;
+}
+
+.switch-row__value {
+  color: var(--md-text-light);
+  font-size: 12px;
+  font-weight: 500;
+}
+
+.icon-text {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.icon-text svg {
+  width: 16px;
+  height: 16px;
+  fill: none;
+  stroke: var(--md-text-light);
+  stroke-width: 1.8;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.icon-text--brand svg {
+  stroke: var(--md-brand);
+}
+
+/* Informacje prawne */
+.legal h2 {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 6px;
+  font-size: 14px;
+  font-weight: 700;
+}
+
+.legal p {
+  color: var(--md-text-light);
+  font-size: 12px;
+  line-height: 1.7;
+}
+
+.legal__footer {
+  margin-top: 24px;
+  padding-top: 16px;
+  border-top: 1px solid var(--md-surface-2);
+  color: var(--md-border-strong);
+  font-size: 11px;
   text-align: center;
 }
 

@@ -59,16 +59,16 @@ describe('AuthSelect', () => {
     const navigate = vi.spyOn(router, 'navigateByUrl').mockResolvedValue(true);
 
     component.openAddModal();
-    component.chooseRole('caregiver');
+    component.newRole.set('caregiver');
     fixture.detectChanges();
 
     const form = fixture.nativeElement.querySelector('form') as HTMLFormElement;
-    (form.querySelector('[name="firstName"]') as HTMLInputElement).value = 'Ola';
-    (form.querySelector('[name="lastName"]') as HTMLInputElement).value = 'Test';
+    (form.querySelector('[name="fullName"]') as HTMLInputElement).value = 'Ola Test';
     form.dispatchEvent(new Event('submit', { cancelable: true }));
 
     const created = database.getAllUsers().find((user) => user.firstName === 'Ola');
     expect(created?.role).toBe('caregiver');
+    expect(created?.lastName).toBe('Test');
     expect(component.isAddModalOpen()).toBe(false);
 
     expect(database.getLocalUserId()).toBe(created!.id);
@@ -94,13 +94,11 @@ describe('AuthSelect', () => {
     const navigate = vi.spyOn(router, 'navigateByUrl').mockResolvedValue(true);
 
     component.openAddModal();
-    component.chooseRole('senior');
     fixture.detectChanges();
-    (fixture.nativeElement.querySelector('.modal__close') as HTMLButtonElement).click();
+    (fixture.nativeElement.querySelector('.modal__head .icon-button') as HTMLButtonElement).click();
     fixture.detectChanges();
 
     expect(component.isAddModalOpen()).toBe(false);
-    expect(component.addMode()).toBe('choice');
     expect(database.getAllUsers().length).toBe(3);
     expect(navigate).not.toHaveBeenCalled();
   });

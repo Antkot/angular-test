@@ -21,6 +21,11 @@
     }
   </div>
 
+  <!-- Błąd bez wyłączenia kamery (np. własny profil) - zostaje nad podglądem. -->
+  @if (status() !== 'error' && errorMessage(); as message) {
+    <p class="scanner-warning">{{ message }}</p>
+  }
+
   <p class="scanner-caption">
     Zeskanuj aparatem kod QR<br />
     w aplikacji osoby<br />
@@ -40,3 +45,52 @@
     </svg>
   </a>
 </div>
+
+<!-- POTWIERDZENIE KODU - popup z pytaniem, zanim cokolwiek zapiszemy -->
+@if (pendingPatient(); as patient) {
+  <div
+    class="modal-backdrop"
+    role="presentation"
+    (click)="closeOnBackdrop($event)"
+    (keydown.escape)="cancelPendingPatient()"
+  >
+    <section class="modal" role="dialog" aria-modal="true" aria-labelledby="scan-confirm-title">
+      <h2 class="modal__title" id="scan-confirm-title">Zeskanowany profil</h2>
+
+      <div class="scan-confirm">
+        <span
+          class="avatar avatar-lg"
+          [style.background]="avatar(patient.id).bg"
+          [style.border-color]="avatar(patient.id).border"
+          [style.color]="avatar(patient.id).text"
+          aria-hidden="true"
+        >
+          {{ patient.initials }}
+        </span>
+        <span class="scan-confirm__text">
+          <span class="scan-confirm__name">{{ patient.firstName }} {{ patient.lastName }}</span>
+          <span class="hint">Czy chcesz dodać ten profil do listy swoich podopiecznych?</span>
+        </span>
+      </div>
+
+      <div class="btn-row">
+        <button
+          type="button"
+          class="btn btn--ghost scan-confirm__cancel"
+          style="flex: 1"
+          (click)="cancelPendingPatient()"
+        >
+          Anuluj
+        </button>
+        <button
+          type="button"
+          class="btn scan-confirm__accept"
+          style="flex: 1"
+          (click)="confirmPendingPatient()"
+        >
+          Tak, dodaj
+        </button>
+      </div>
+    </section>
+  </div>
+}

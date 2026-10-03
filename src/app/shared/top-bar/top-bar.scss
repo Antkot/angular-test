@@ -1,3 +1,19 @@
+.topbar {
+  display: block;
+  flex-shrink: 0;
+  height: var(--md-topbar-h);
+  padding: 0 12px;
+  background: #ffffff;
+  border-bottom: 1px solid var(--md-border);
+}
+
+.topbar__inner {
+  display: grid;
+  grid-template-columns: 2rem 1fr 2rem;
+  align-items: center;
+  height: 100%;
+}
+
 .topbar__slot {
   display: flex;
   align-items: center;

@@ -34,6 +34,9 @@ export class SeniorDashboard implements OnInit {
   public readonly tagFilter = signal<string | null>(null);
   public readonly filterOpen = signal(false);
 
+  /** Wypiski sekcji listy podopiecznych - stała używana także w URL cofnięcia. */
+  public readonly caregiverHome = CAREGIVER_HOME_ROUTE;
+
   /** Unikalne tagi z badań - źródło filtrów pod wyszukiwarką. */
   public readonly allTags = computed(() => [
     ...new Set(this.records().flatMap((record) => record.tags)),

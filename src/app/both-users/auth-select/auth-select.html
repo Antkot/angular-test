@@ -1,4 +1,17 @@
 <div class="page page--tight">
+  <!-- Powrót do logowania -->
+  <button
+    type="button"
+    class="icon-button"
+    style="margin-left: -8px; margin-bottom: 8px"
+    (click)="goBack()"
+    aria-label="Wróć do logowania"
+  >
+    <svg viewBox="0 0 24 24" aria-hidden="true">
+      <path d="M15 5l-7 7 7 7" />
+    </svg>
+  </button>
+
   <h1 class="page-title">Wybierz konto</h1>
 
   @if (isLoading()) {
@@ -51,70 +64,89 @@
     (keydown.escape)="closeAddModal()"
   >
     <section class="modal" role="dialog" aria-modal="true" aria-labelledby="account-modal-title">
-      <h2 class="modal__title" id="account-modal-title">Nowe konto</h2>
+      <header class="modal__head">
+        <span class="icon-text icon-text--brand">
+          <svg viewBox="0 0 24 24" aria-hidden="true">
+            <path d="M15 19v-2M9 19v-2M4 15v-3M20 15v-3M12 5v10M7 9l5-4 5 4" />
+            <circle cx="12" cy="5" r="2" />
+          </svg>
+          <span class="modal__title" id="account-modal-title">Nowy użytkownik</span>
+        </span>
+        <button
+          type="button"
+          class="icon-button icon-button--sm"
+          (click)="closeAddModal()"
+          aria-label="Zamknij okno"
+        >
+          <svg viewBox="0 0 24 24" aria-hidden="true">
+            <path d="M6 6l12 12M18 6L6 18" />
+          </svg>
+        </button>
+      </header>
 
-      @if (addMode() === 'choice') {
-        <p class="hint">Jakiego rodzaju jest to konto?</p>
-        <div class="stack" style="margin-top: 12px">
-          <button type="button" class="btn btn--block" (click)="chooseRole('senior')">
-            Senior (pacjent)
-          </button>
-          <button type="button" class="btn btn--ghost btn--block" (click)="chooseRole('caregiver')">
-            Opiekun
-          </button>
+      <form (submit)="createAccount($event)">
+        <!-- Podgląd awatara -->
+        <div class="modal__avatar">
+          <span
+            class="account-tile__avatar"
+            [style.background]="avatarPreview().bg"
+            [style.border-color]="avatarPreview().border"
+            [style.color]="avatarPreview().text"
+            aria-hidden="true"
+          >
+            {{ initialsPreview() }}
+          </span>
         </div>
-      } @else {
-        <form (submit)="createAccount($event)">
-          <p class="hint" style="margin-bottom: 12px">
-            Rejestrujesz się jako:
-            <strong>{{ addMode() === 'caregiver' ? 'Opiekun' : 'Senior' }}</strong>
-          </p>
 
-          <div class="field">
-            <span class="field__label">Imię</span>
-            <input
-              class="input"
-              name="firstName"
-              type="text"
-              autocomplete="given-name"
-              required
-            />
-          </div>
+        <div class="field">
+          <span class="field__label">Imię i nazwisko</span>
+          <input
+            class="input"
+            name="fullName"
+            type="text"
+            placeholder="np. Anna Nowak"
+            required
+            (input)="onNameInput($event)"
+          />
+        </div>
 
-          <div class="field">
-            <span class="field__label">Nazwisko</span>
-            <input
-              class="input"
-              name="lastName"
-              type="text"
-              autocomplete="family-name"
-              required
-            />
-          </div>
+        <div class="field">
+          <span class="field__label">Adres e-mail</span>
+          <input
+            class="input"
+            name="email"
+            type="email"
+            autocomplete="email"
+            placeholder="np. anna.nowak@gmail.com"
+          />
+        </div>
 
-          <div class="field">
-            <span class="field__label">E-mail (opcjonalnie)</span>
-            <input
-              class="input"
-              name="email"
-              type="email"
-              autocomplete="email"
-              placeholder="jan.kowalski@gmail.com"
-            />
-          </div>
-
-          <div class="btn-row" style="margin-top: 16px">
-            <button type="submit" class="btn" style="flex: 1">Utwórz konto</button>
-            <button type="button" class="btn btn--ghost" (click)="addMode.set('choice')">
-              Zmień rolę
+        <div class="field">
+          <span class="field__label">Rola profilu</span>
+          <div class="role-picker">
+            <button
+              type="button"
+              class="role-option"
+              [class.is-active]="newRole() === 'senior'"
+              (click)="newRole.set('senior')"
+            >
+              Pacjent
+            </button>
+            <button
+              type="button"
+              class="role-option"
+              [class.is-active]="newRole() === 'caregiver'"
+              (click)="newRole.set('caregiver')"
+            >
+              Opiekun
             </button>
           </div>
-        </form>
-      }
+        </div>
 
-      <button class="modal__close" type="button" (click)="closeAddModal()" aria-label="Zamknij okno">
-        Zamknij
-      </button>
+        <button type="submit" class="btn btn--pill btn--block" style="margin-top: 16px">
+          Utwórz konto
+        </button>
+      </form>
     </section>
   </div>
 }

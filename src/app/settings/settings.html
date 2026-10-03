@@ -1,20 +1,20 @@
 <app-top-bar title="Ustawienia" [showSettings]="false" />
 
 <div class="rows">
-  <button type="button" class="row">
+  <a class="row" routerLink="/settings/general">
     <span>Ogólne</span>
     <span class="row__chevron" aria-hidden="true">›</span>
-  </button>
+  </a>
 
   <a class="row" routerLink="/verify">
     <span>Weryfikacja użytkownika</span>
     <span class="row__chevron" aria-hidden="true">›</span>
   </a>
 
-  <button type="button" class="row">
+  <a class="row" routerLink="/settings/legal">
     <span>Informacje prawne</span>
     <span class="row__chevron" aria-hidden="true">›</span>
-  </button>
+  </a>
 </div>
 
 <!-- KONTO I WYLOGOWANIE -->

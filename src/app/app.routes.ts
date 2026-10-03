@@ -8,6 +8,8 @@ import { VerifyUser } from './both-users/verify/verify-user';
 import { SeniorDashboard } from './senior/senior-dashboard/senior-dashboard';
 import { CaregiverDashboard } from './full-user/caregiver-dashboard/caregiver-dashboard';
 import { Settings } from './settings/settings';
+import { GeneralSettings } from './settings/general/general-settings';
+import { LegalInfo } from './settings/legal/legal-info';
 import { DataView } from './data/data-view';
 import { AUTH_ROUTE, Database } from './services/database';
 
@@ -43,6 +45,8 @@ export const routes: Routes = [
 
   // Ustawienia (ikona zębatki w pasku).
   { path: 'settings', component: Settings, canActivate: [sessionGuard] },
+  { path: 'settings/general', component: GeneralSettings, canActivate: [sessionGuard] },
+  { path: 'settings/legal', component: LegalInfo, canActivate: [sessionGuard] },
 
   // Lazy loaded: the camera library (html5-qrcode) is only needed on this route.
   {

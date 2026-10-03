@@ -7,6 +7,8 @@ const scannerMock = vi.hoisted(() => ({
   start: vi.fn(() => Promise.resolve(null)),
   stop: vi.fn(() => Promise.resolve()),
   clear: vi.fn(),
+  pause: vi.fn(),
+  resume: vi.fn(),
   onSuccess: undefined as ((decodedText: string) => void) | undefined,
   startError: undefined as Error | undefined,
   instances: [] as { elementId: string }[],
@@ -28,6 +30,8 @@ vi.mock('html5-qrcode', () => ({
     }
     stop = scannerMock.stop;
     clear = scannerMock.clear;
+    pause = scannerMock.pause;
+    resume = scannerMock.resume;
   },
 }));
 
@@ -43,7 +47,16 @@ describe('QrScanner', () => {
     await fixture.whenStable();
   };
 
+  const dialog = () => fixture.nativeElement.querySelector('.scan-confirm') as HTMLElement | null;
+  const clickIn = (selector: string) => {
+    const button = fixture.nativeElement.querySelector(selector) as HTMLButtonElement | null;
+    button?.click();
+    fixture.detectChanges();
+  };
+
   beforeEach(async () => {
+    vi.clearAllMocks();
+    scannerMock.instances.length = 0;
     scannerMock.startError = undefined;
     localStorage.clear();
     await TestBed.configureTestingModule({
@@ -65,17 +78,61 @@ describe('QrScanner', () => {
     expect(component.status()).toBe('scanning');
   });
 
-  it('grants access, stops the camera and redirects after a valid scan', async () => {
+  it('asks for confirmation instead of granting access on a valid scan', async () => {
     const navigate = vi.spyOn(router, 'navigate').mockResolvedValue(true);
 
     // 'user-c' to konto obcej pacjentki - konto lokalne domyślnie to 'user-b'
     scannerMock.onSuccess?.('user-c');
+    fixture.detectChanges();
+
+    expect(dialog()).toBeTruthy();
+    expect(dialog()?.textContent).toContain('Maria Kowalska (Babcia)');
+    expect(scannerMock.pause).toHaveBeenCalled();
+    // Nic jeszcze nie zapisujemy - decyzja opiekuna dopiero zapada w popupie.
+    expect(database.getPatientIds('user-b')).toEqual([]);
+    expect(navigate).not.toHaveBeenCalled();
+  });
+
+  it('grants access, stops the camera and redirects after confirming', async () => {
+    const navigate = vi.spyOn(router, 'navigate').mockResolvedValue(true);
+
+    scannerMock.onSuccess?.('user-c');
+    fixture.detectChanges();
+    clickIn('.scan-confirm__accept');
     await flush();
 
     expect(database.hasAccess('user-c', 'user-b')).toBe(true);
     expect(database.getPatientIds('user-b')).toEqual(['user-c']);
+    expect(dialog()).toBeNull();
     expect(scannerMock.stop).toHaveBeenCalled();
     expect(navigate).toHaveBeenCalledWith(['/caregiver-dashboard']);
+  });
+
+  it('cancelling the dialog changes nothing and resumes scanning', async () => {
+    const navigate = vi.spyOn(router, 'navigate').mockResolvedValue(true);
+
+    scannerMock.onSuccess?.('user-c');
+    fixture.detectChanges();
+    clickIn('.scan-confirm__cancel');
+
+    expect(dialog()).toBeNull();
+    expect(database.getPatientIds('user-b')).toEqual([]);
+    expect(navigate).not.toHaveBeenCalled();
+    expect(component.errorMessage()).toBeNull();
+    expect(scannerMock.resume).toHaveBeenCalled();
+    expect(component.status()).toBe('scanning');
+  });
+
+  it('ignores repeated frames of the same code while the dialog is open', async () => {
+    const navigate = vi.spyOn(router, 'navigate').mockResolvedValue(true);
+
+    scannerMock.onSuccess?.('user-c');
+    scannerMock.onSuccess?.('user-c');
+    fixture.detectChanges();
+
+    expect(component.pendingPatient()?.id).toBe('user-c');
+    expect(database.getPatientIds('user-b')).toEqual([]);
+    expect(navigate).not.toHaveBeenCalled();
   });
 
   it('refuses a QR code pointing at the local profile', async () => {
@@ -83,8 +140,10 @@ describe('QrScanner', () => {
 
     scannerMock.onSuccess?.(database.getLocalUserId());
     await flush();
+    fixture.detectChanges();
 
     expect(component.errorMessage()).toContain('Twój własny profil');
+    expect(dialog()).toBeNull();
     expect(navigate).not.toHaveBeenCalled();
     expect(component.status()).toBe('scanning');
   });
@@ -96,6 +155,7 @@ describe('QrScanner', () => {
     await flush();
 
     expect(component.errorMessage()).toContain('Nie udało się dodać pacjenta');
+    expect(dialog()).toBeNull();
     expect(navigate).not.toHaveBeenCalled();
   });
 

@@ -14,6 +14,20 @@
   background: #ffffff;
 }
 
+/* Na PC arkusz nie leży na całej szerokości okna. */
+@media (min-width: 768px) {
+  .sheet {
+    max-width: 460px;
+    border-radius: 12px;
+    margin: 0 auto 24px;
+  }
+
+  .sheet-backdrop {
+    align-items: flex-end;
+    padding: 24px;
+  }
+}
+
 .sheet__head {
   display: grid;
   grid-template-columns: 2rem 1fr 2rem;

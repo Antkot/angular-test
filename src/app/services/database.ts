@@ -301,4 +301,13 @@ export class Database {
     this.saveRecords(this.getStoredRecords().filter((record) => record.id !== recordId));
     return of(true).pipe(delay(200));
   }
+
+  // 8. Reset do danych demonstracyjnych (Ustawienia -> Ogólne)
+  resetData(): void {
+    localStorage.removeItem(this.recordsKey);
+    localStorage.removeItem(this.accessKey);
+    localStorage.removeItem(this.usersKey);
+    localStorage.removeItem(this.localUserKey);
+    this.initStorage();
+  }
 }

@@ -1,8 +1,8 @@
-// auth-select.ts - ekran rejestracji/wyboru konta: nowe konto + rola.
-import { Component, OnInit, inject, signal } from '@angular/core';
+// auth-select.ts - ekran wyboru konta oraz rejestracji nowego użytkownika.
+import { Component, OnInit, computed, inject, signal } from '@angular/core';
 import { Router } from '@angular/router';
 import { AvatarColor, avatarColor } from '../../data/tag-colors';
-import { Database } from '../../services/database';
+import { AUTH_ROUTE, Database } from '../../services/database';
 import { User, UserId, UserRole } from '../../models/app.models';
 
 @Component({
@@ -19,8 +19,25 @@ export class AuthSelect implements OnInit {
   readonly accounts = signal<User[]>([]);
   readonly isLoading = signal(true);
   readonly isAddModalOpen = signal(false);
-  /** 'choice' = ekran wyboru roli, wartość inna niż 'choice' = wybrana rola konta. */
-  readonly addMode = signal<'choice' | UserRole>('choice');
+  /** Rola wybierana w formularzu nowego konta. */
+  readonly newRole = signal<UserRole>('senior');
+  /** Imię i nazwisko wpisane w formularzu (do podglądu awatara). */
+  readonly newName = signal('');
+
+  /** Inicjały z nazwy - "Anna Nowak" -> "AN". */
+  readonly initialsPreview = computed(() => {
+    const parts = this.newName().trim().split(/\s+/).filter(Boolean);
+    if (parts.length === 0) {
+      return 'U';
+    }
+    if (parts.length === 1) {
+      return parts[0].slice(0, 2).toLocaleUpperCase();
+    }
+    return (parts[0].charAt(0) + parts[1].charAt(0)).toLocaleUpperCase();
+  });
+
+  /** Kolor awatara liczony z nazwy - ten sam co po zapisaniu konta. */
+  readonly avatarPreview = computed<AvatarColor>(() => avatarColor(this.newName() || 'nowy'));
 
   ngOnInit(): void {
     this.database.getUsers().subscribe({
@@ -45,18 +62,19 @@ export class AuthSelect implements OnInit {
     return avatarColor(userId);
   }
 
+  /** Powrót do ekranu logowania. */
+  goBack(): void {
+    void this.router.navigateByUrl(AUTH_ROUTE);
+  }
+
   openAddModal(): void {
-    this.addMode.set('choice');
+    this.newRole.set('senior');
+    this.newName.set('');
     this.isAddModalOpen.set(true);
   }
 
   closeAddModal(): void {
     this.isAddModalOpen.set(false);
-    this.addMode.set('choice');
-  }
-
-  chooseRole(role: UserRole): void {
-    this.addMode.set(role);
   }
 
   closeOnBackdrop(event: MouseEvent): void {
@@ -65,26 +83,31 @@ export class AuthSelect implements OnInit {
     }
   }
 
+  onNameInput(event: Event): void {
+    this.newName.set((event.target as HTMLInputElement).value);
+  }
+
   /** Rejestracja nowego konta: zapis w bazie, zalogowanie i przejście do widoku roli. */
   createAccount(event: SubmitEvent): void {
     event.preventDefault();
 
-    const role = this.addMode();
-    if (role === 'choice') {
-      return;
-    }
-
-    const form = event.currentTarget as HTMLFormElement;
-    const formData = new FormData(form);
-    const firstName = String(formData.get('firstName') ?? '').trim();
-    const lastName = String(formData.get('lastName') ?? '').trim();
+    const formData = new FormData(event.currentTarget as HTMLFormElement);
+    const fullName = String(formData.get('fullName') ?? '').trim();
     const email = String(formData.get('email') ?? '').trim();
 
+    const [firstName = '', ...rest] = fullName.split(/\s+/);
+    const lastName = rest.join(' ');
     if (!firstName || !lastName) {
       return;
     }
 
-    const account = this.database.registerUser({ firstName, lastName, email, role });
+    const account = this.database.registerUser({
+      firstName,
+      lastName,
+      email,
+      role: this.newRole(),
+    });
+
     this.accounts.update((accounts) => [...accounts, account]);
     this.closeAddModal();
     this.signIn(account);

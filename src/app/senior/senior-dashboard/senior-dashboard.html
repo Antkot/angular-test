@@ -1,4 +1,9 @@
-<app-top-bar [title]="profileTitle()" [showBack]="isCaregiverContext()" [showSettings]="!isCaregiverContext()" />
+<app-top-bar
+  [title]="profileTitle()"
+  [showBack]="isCaregiverContext()"
+  [showSettings]="!isCaregiverContext()"
+  [backUrl]="isCaregiverContext() ? caregiverHome : undefined"
+/>
 
 <div class="page">
   <!-- DANE KONTA: senior udostępnia profil, opiekun widzi podopiecznego -->
