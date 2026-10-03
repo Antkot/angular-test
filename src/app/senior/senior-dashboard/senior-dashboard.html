@@ -1,1 +1,39 @@
-<p>senior-dashboard works!</p>
+<div style="padding: 20px; font-family: sans-serif; color: #ffffff;">
+  <h2>Panel Seniora - Historia badań</h2>
+
+  @if (isLoading) {
+  <p style="color: #aaaaaa;">Ładowanie danych z bazy...</p>
+  }
+  @else {
+  <div style="display: flex; flex-direction: column; gap: 15px; margin-top: 20px;">
+
+    @for (record of records; track record.id) {
+    <div style="background-color: #1e1e1e; border: 1px solid #333333; border-radius: 12px; padding: 15px; box-shadow: 0 4px 6px rgba(0,0,0,0.3);">
+
+      <h3 style="margin-top: 0; margin-bottom: 5px; color: #ffffff;">{{ record.title }}</h3>
+
+      <div style="font-size: 14px; color: #bbbbbb; margin-bottom: 10px;">
+        <span style="margin-right: 15px;">📅 {{ record.date }}</span>
+        <span>👨‍⚕️ dr {{ record.doctor }}</span>
+      </div>
+
+      <p style="font-size: 14px; color: #dddddd;">{{ record.description }}</p>
+
+      @if (record.tags.length > 0) {
+      <div style="display: flex; gap: 8px; margin-top: 10px;">
+        @for (tag of record.tags; track tag) {
+        <span style="background-color: #552222; color: #ff9999; padding: 4px 10px; border-radius: 12px; font-size: 12px; font-weight: bold;">
+          {{ tag }}
+        </span>
+        }
+      </div>
+      }
+
+    </div>
+    } @empty {
+    <p style="color: #aaaaaa;">Brak historii medycznej dla tego pacjenta.</p>
+    }
+
+  </div>
+  }
+</div>
