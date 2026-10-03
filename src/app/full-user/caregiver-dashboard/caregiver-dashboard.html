@@ -1,15 +1,10 @@
 <div class="caregiver-dashboard">
   <header class="caregiver-dashboard__header">
-    <div>
-      <h2>Panel Opiekuna</h2>
-      @if (self(); as account) {
-        <p class="hint">{{ account.firstName }} {{ account.lastName }} ({{ account.id }})</p>
-      }
-    </div>
+    <h2>Panel Opiekuna</h2>
 
     <div class="caregiver-dashboard__actions">
-      <!-- Opiekun dodaje kolejnych podopiecznych skanując ich kody QR -->
-      <a class="action-button" routerLink="/qr-scanner">Zeskanuj pacjenta</a>
+      <!-- Każdy skan dodaje kolejnego podopiecznego -->
+      <a class="action-button" routerLink="/qr-scanner">Dodaj podopiecznego przez QR</a>
       <button type="button" class="action-button action-button--ghost" (click)="signOut()">
         Zmień konto
       </button>
@@ -17,33 +12,43 @@
   </header>
 
   @if (isLoading()) {
-    <p class="hint">Ładowanie podopiecznych...</p>
+    <p class="hint">Ładowanie profili...</p>
   } @else {
     <section class="section">
       <h3 class="section__title">
-        Podopieczni
-        <span class="section__accent">{{ dependents().length }}</span>
+        Profile
+        <span class="section__accent">{{ roster().length }}</span>
       </h3>
 
       <div class="patient-picker">
-        @for (dependent of dependents(); track dependent.id) {
-          <article class="patient-tile">
-            <span class="patient-tile__avatar" aria-hidden="true">{{ dependent.initials }}</span>
+        @for (entry of roster(); track entry.user.id) {
+          <a
+            class="patient-tile"
+            [routerLink]="profileLink(entry.user.id)"
+            [attr.aria-label]="
+              'Otwórz profil: ' + entry.user.firstName + ' ' + entry.user.lastName
+            "
+          >
+            <span class="patient-tile__avatar" aria-hidden="true">{{ entry.user.initials }}</span>
 
             <span>
               <span class="patient-tile__name">
-                {{ dependent.firstName }} {{ dependent.lastName }}
+                {{ entry.user.firstName }} {{ entry.user.lastName }}
               </span>
-              <span class="patient-tile__badge">{{ dependent.id }}</span>
+              <span class="patient-tile__badge">
+                {{ entry.isSelf ? 'Twoje konto' : 'Podopieczny' }}
+              </span>
             </span>
-          </article>
-        } @empty {
-          <p class="hint">
-            Brak podopiecznych. Zeskanuj kod QR pacjenta, aby dodać jego profil - możesz
-            powtarzać to dla kolejnych osób.
-          </p>
+          </a>
         }
       </div>
+
+      @if (roster().length <= 1) {
+        <p class="hint">
+          Nie masz jeszcze podopiecznych. Zeskanuj kod QR pacjenta, aby dodać jego profil -
+          możesz powtarzać to dla kolejnych osób.
+        </p>
+      }
     </section>
   }
 </div>

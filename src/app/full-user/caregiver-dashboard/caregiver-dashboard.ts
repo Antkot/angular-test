@@ -1,7 +1,13 @@
 import { Component, OnInit, inject, signal } from '@angular/core';
 import { Router, RouterLink } from '@angular/router';
-import { AUTH_ROUTE, Database } from '../../services/database';
-import { User } from '../../models/app.models';
+import { AUTH_ROUTE, Database, SENIOR_HOME_ROUTE } from '../../services/database';
+import { User, UserId } from '../../models/app.models';
+
+/** Wpis na liście profili opiekuna: własne konto albo podopieczny. */
+interface RosterEntry {
+  user: User;
+  isSelf: boolean;
+}
 
 @Component({
   imports: [RouterLink],
@@ -14,23 +20,26 @@ export class CaregiverDashboard implements OnInit {
   private readonly router = inject(Router);
 
   public readonly isLoading = signal(true);
-  /** Konto zalogowane na tym urządzeniu - jego profil jest w bazie. */
-  public readonly self = signal<User | undefined>(undefined);
-  /** Podopieczni dodani przez zeskanowanie kodu QR. */
-  public readonly dependents = signal<User[]>([]);
+  /** Siebie samego + podopiecznych z patientIds. */
+  public readonly roster = signal<RosterEntry[]>([]);
 
   ngOnInit(): void {
-    const selfId = this.database.getLocalUserId();
-    this.self.set(this.database.getLocalUserProfile());
+    const localUserId = this.database.getLocalUserId();
 
     this.database.getAccessibleProfiles().subscribe({
       next: (profiles: User[]) => {
-        this.self.set(profiles.find((profile) => profile.id === selfId) ?? this.self());
-        this.dependents.set(profiles.filter((profile) => profile.id !== selfId));
+        this.roster.set(profiles.map((user) => ({ user, isSelf: user.id === localUserId })));
         this.isLoading.set(false);
       },
       error: () => this.isLoading.set(false),
     });
+  }
+
+  /** Własny profil → /senior-dashboard, podopieczny → /senior-dashboard/:patientId. */
+  public profileLink(patientId: UserId): string[] {
+    return patientId === this.database.getLocalUserId()
+      ? [SENIOR_HOME_ROUTE]
+      : [SENIOR_HOME_ROUTE, patientId];
   }
 
   /** Wylogowanie: wracamy na ekran logowania/rejestracji. */

@@ -1,8 +1,13 @@
 import { Component, OnInit, inject, signal } from '@angular/core';
-import { Router, RouterLink } from '@angular/router';
-import { AUTH_ROUTE, Database } from '../../services/database';
+import { ActivatedRoute, Router, RouterLink } from '@angular/router';
+import { AUTH_ROUTE, CAREGIVER_HOME_ROUTE, Database } from '../../services/database';
 import { MedicalRecord, User, UserId } from '../../models/app.models';
 
+/**
+ * Uniwersalny widok profilu pacjenta:
+ * - bez parametru → własny profil (kontekst seniora: dane + "Pokaż mój kod dostępu"),
+ * - /senior-dashboard/:patientId → profil podopiecznego (kontekst opiekuna: dane + powrót).
+ */
 @Component({
   selector: 'app-senior-dashboard',
   standalone: true,
@@ -13,69 +18,62 @@ import { MedicalRecord, User, UserId } from '../../models/app.models';
 export class SeniorDashboard implements OnInit {
   private readonly database = inject(Database);
   private readonly router = inject(Router);
+  private readonly route = inject(ActivatedRoute);
 
-  // Konta, do których ma dostęp zalogowane konto (dane z tabeli uprawnień)
-  public readonly profiles = signal<User[]>([]);
-  // Wybrany pacjent - najpierw wybór pacjenta, potem jego badania
-  public readonly selectedPatientId = signal<UserId | null>(null);
+  // Oglądany profil: własny albo podopieczny wybrany przez opiekuna.
+  public readonly profile = signal<User | undefined>(undefined);
   public readonly records = signal<MedicalRecord[]>([]);
   public readonly isLoading = signal(true);
-  public readonly isLoadingRecords = signal(false);
-  public readonly localUserId: UserId;
-
-  constructor() {
-    this.localUserId = this.database.getLocalUserId();
-  }
+  /** Opiekun ogląda cudzy profil - wtedy dashboard jest szczegółami podopiecznego. */
+  public readonly isCaregiverContext = signal(false);
 
   ngOnInit(): void {
-    this.database.getAccessibleProfiles().subscribe({
-      next: (profiles: User[]) => {
-        this.profiles.set(profiles);
-
-        // Domyślnie pokazujemy konto tego urządzenia, a gdyby nie było widoczne - pierwsze dostępne
-        const own = profiles.find((profile) => profile.id === this.localUserId);
-        const initial = own ?? profiles[0];
-
-        this.selectedPatientId.set(initial?.id ?? null);
-        this.isLoading.set(false);
-
-        if (initial) {
-          this.loadRecords(initial.id);
-        }
-      },
-      error: () => this.isLoading.set(false),
-    });
+    this.route.paramMap.subscribe((params) => this.showProfile(params.get('patientId')));
   }
 
-  selectPatient(userId: UserId): void {
-    if (userId === this.selectedPatientId()) {
-      return;
-    }
-    this.selectedPatientId.set(userId);
-    this.loadRecords(userId);
+  /** Kod QR udostępnia własny profil - profilu podopiecznego nie udostępniamy stąd. */
+  public get canShareAccessCode(): boolean {
+    return !this.isCaregiverContext();
   }
 
-  userName(userId: UserId): string {
-    const user = this.database.getUserById(userId);
-    return user ? `${user.firstName} ${user.lastName}` : userId;
+  /** Powrót do listy podopiecznych (tylko w kontekście opiekuna). */
+  public goBack(): void {
+    void this.router.navigateByUrl(CAREGIVER_HOME_ROUTE);
   }
 
   /** Wylogowanie: wracamy na ekran logowania/rejestracji. */
-  signOut(): void {
+  public signOut(): void {
     this.database.signOut();
     void this.router.navigateByUrl(AUTH_ROUTE);
   }
 
-  private loadRecords(userId: UserId): void {
-    this.isLoadingRecords.set(true);
-    this.database.getMedicalRecordsByUserId(userId).subscribe({
+  private showProfile(requestedId: string | null): void {
+    const localUserId = this.database.getLocalUserId();
+    const patientId = requestedId?.trim() || localUserId;
+
+    // Na profil cudzego konta wchodzimy tylko z poziomu opiekuna, który ma do niego dostęp.
+    if (patientId !== localUserId && !this.database.hasAccess(patientId, localUserId)) {
+      void this.router.navigateByUrl(this.database.getHomeRoute());
+      return;
+    }
+
+    this.isCaregiverContext.set(patientId !== localUserId);
+    this.profile.set(this.database.getUserById(patientId));
+    this.loadRecords(patientId);
+  }
+
+  private loadRecords(patientId: UserId): void {
+    this.isLoading.set(true);
+    this.records.set([]);
+
+    this.database.getMedicalRecordsByUserId(patientId).subscribe({
       next: (records: MedicalRecord[]) => {
         this.records.set(records);
-        this.isLoadingRecords.set(false);
+        this.isLoading.set(false);
       },
       error: () => {
         this.records.set([]);
-        this.isLoadingRecords.set(false);
+        this.isLoading.set(false);
       },
     });
   }

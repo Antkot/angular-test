@@ -11,8 +11,15 @@ describe('CaregiverDashboard', () => {
 
   // Database symuluje opóźnienie (delay) przy pobieraniu profili
   const flush = async () => {
-    await new Promise((resolve) => setTimeout(resolve, 800));
+    await new Promise((resolve) => setTimeout(resolve, 500));
     fixture.detectChanges();
+  };
+
+  const createDashboard = async () => {
+    fixture = TestBed.createComponent(CaregiverDashboard);
+    component = fixture.componentInstance;
+    fixture.detectChanges();
+    await flush();
   };
 
   beforeEach(async () => {
@@ -25,57 +32,59 @@ describe('CaregiverDashboard', () => {
     database = TestBed.inject(Database);
     database.setLocalUserId('user-a');
 
-    fixture = TestBed.createComponent(CaregiverDashboard);
-    component = fixture.componentInstance;
-    fixture.detectChanges();
-    await flush();
+    await createDashboard();
   });
 
-  it('separates the signed in account from its dependents', () => {
+  it('lists the caregiver and the granted dependents', () => {
     expect(component.isLoading()).toBe(false);
-    expect(component.self()?.id).toBe('user-a');
-    // Anna ma w bazie podopiecznych 'user-b' i 'user-c'
-    expect(component.dependents().map((dependent) => dependent.id)).toEqual(['user-b', 'user-c']);
+    expect(component.roster().map((entry) => entry.user.id)).toEqual(['user-a', 'user-b', 'user-c']);
+    expect(component.roster()[0].isSelf).toBe(true);
+    expect(component.roster()[1].isSelf).toBe(false);
   });
 
-  it('renders a card per dependent and a link to the scanner', () => {
-    const tiles = fixture.nativeElement.querySelectorAll(
-      '.patient-tile',
-    ) as NodeListOf<HTMLElement>;
-    expect(tiles.length).toBe(2);
+  it('links each profile to the patient dashboard', () => {
+    const links = fixture.nativeElement.querySelectorAll('a[href^="/senior-dashboard"]');
 
-    const scannerLink = fixture.nativeElement.querySelector(
+    expect(links.length).toBe(3);
+    // Własny profil bez parametru, podopieczni z identyfikatorem
+    expect((links[0] as HTMLAnchorElement).getAttribute('href')).toBe('/senior-dashboard');
+    expect((links[1] as HTMLAnchorElement).getAttribute('href')).toBe('/senior-dashboard/user-b');
+    expect((links[2] as HTMLAnchorElement).getAttribute('href')).toBe('/senior-dashboard/user-c');
+  });
+
+  it('links to the scanner', () => {
+    const link = fixture.nativeElement.querySelector(
       'a[href="/qr-scanner"]',
     ) as HTMLAnchorElement;
-    expect(scannerLink.textContent).toContain('Zeskanuj pacjenta');
+
+    expect(link.textContent).toContain('Dodaj podopiecznego przez QR');
   });
 
-  it('shows an empty state for a freshly registered caregiver', async () => {
+  it('shows only the own profile for a freshly registered caregiver', async () => {
     const account = database.registerUser({
       firstName: 'Nowy',
       lastName: 'Opiekun',
       role: 'caregiver',
     });
     database.setLocalUserId(account.id);
+    await createDashboard();
 
-    fixture = TestBed.createComponent(CaregiverDashboard);
-    component = fixture.componentInstance;
-    fixture.detectChanges();
-    await flush();
-
-    expect(component.dependents()).toEqual([]);
-    expect(fixture.nativeElement.textContent).toContain('Brak podopiecznych');
+    expect(component.roster().length).toBe(1);
+    expect(fixture.nativeElement.textContent).toContain('Nie masz jeszcze podopiecznych');
   });
 
   it('adds a scanned patient to the list on the next load', async () => {
+    const caregiver = database.registerUser({
+      firstName: 'Nowy',
+      lastName: 'Opiekun',
+      role: 'caregiver',
+    });
+    database.setLocalUserId(caregiver.id);
     expect(await firstValueFrom(database.addPatient('user-c'))).toBe(true);
 
-    fixture = TestBed.createComponent(CaregiverDashboard);
-    component = fixture.componentInstance;
-    fixture.detectChanges();
-    await flush();
+    await createDashboard();
 
-    expect(component.dependents().map((dependent) => dependent.id)).toContain('user-c');
+    expect(component.roster().map((entry) => entry.user.id)).toEqual(['user-c', caregiver.id]);
   });
 
   it('signs out and returns to the login screen', () => {
@@ -85,6 +94,6 @@ describe('CaregiverDashboard', () => {
     component.signOut();
 
     expect(database.hasSession()).toBe(false);
-    expect(navigate).toHaveBeenCalledWith('/auth');
+    expect(navigate).toHaveBeenCalledWith('/login');
   });
 });

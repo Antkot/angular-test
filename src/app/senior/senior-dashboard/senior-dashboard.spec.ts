@@ -1,115 +1,118 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { provideRouter } from '@angular/router';
+import { ActivatedRoute, convertToParamMap, provideRouter, Router } from '@angular/router';
+import { of } from 'rxjs';
+import { Database } from '../../services/database';
 import { SeniorDashboard } from './senior-dashboard';
 
 describe('SeniorDashboard', () => {
   let fixture: ComponentFixture<SeniorDashboard>;
   let component: SeniorDashboard;
+  let database: Database;
+  let navigate: ReturnType<typeof vi.spyOn>;
 
-  // Database symuluje opóźnienie (delay), a pozycje ładują się jedna po drugiej,
-  // więc czekamy z zapasem na oba etapy
+  // Database symuluje opóźnienie (delay), więc czekamy na dane
   const flush = async () => {
-    await new Promise((resolve) => setTimeout(resolve, 800));
+    await new Promise((resolve) => setTimeout(resolve, 500));
     fixture.detectChanges();
   };
 
-  beforeEach(async () => {
+  const setup = async (localUserId: string, patientId: string | null) => {
     localStorage.clear();
     TestBed.resetTestingModule();
     await TestBed.configureTestingModule({
       imports: [SeniorDashboard],
-      providers: [provideRouter([])],
+      providers: [
+        provideRouter([]),
+        {
+          provide: ActivatedRoute,
+          useValue: { paramMap: of(convertToParamMap(patientId ? { patientId } : {})) },
+        },
+      ],
     }).compileComponents();
 
+    database = TestBed.inject(Database);
+    database.setLocalUserId(localUserId);
+    navigate = vi.spyOn(TestBed.inject(Router), 'navigateByUrl').mockResolvedValue(true);
+
     fixture = TestBed.createComponent(SeniorDashboard);
     component = fixture.componentInstance;
     fixture.detectChanges();
     await flush();
+  };
+
+  // KONTEKST SENIORA
+  describe('własny profil', () => {
+    beforeEach(async () => setup('user-b', null));
+
+    it('shows the profile of the signed in senior', () => {
+      expect(component.profile()?.id).toBe('user-b');
+      expect(fixture.nativeElement.textContent).toContain('Jan Kowalski');
+    });
+
+    it('loads only the records of the signed in senior', () => {
+      expect(component.isLoading()).toBe(false);
+      expect(component.records().length).toBe(2);
+      expect(component.records().every((record) => record.userId === 'user-b')).toBe(true);
+    });
+
+    it('does not list other accounts', () => {
+      expect(fixture.nativeElement.querySelectorAll('.patient-tile').length).toBe(0);
+      expect(fixture.nativeElement.textContent).not.toContain('Anna');
+      expect(fixture.nativeElement.textContent).not.toContain('Maria');
+    });
+
+    it('offers the access code and no back button', () => {
+      const link = fixture.nativeElement.querySelector('a[href="/qr-display"]') as HTMLElement;
+      expect(link.textContent).toContain('Pokaż mój kod dostępu');
+      expect(fixture.nativeElement.textContent).not.toContain('Wróć do podopiecznych');
+    });
   });
 
-  it('shows the accessible profiles after loading', () => {
-    expect(component.isLoading()).toBe(false);
-    expect(component.profiles().length).toBeGreaterThan(0);
+  // KONTEKST OPIEKUNA
+  describe('profil podopiecznego', () => {
+    beforeEach(async () => setup('user-a', 'user-c'));
+
+    it('shows the data of the chosen dependent', () => {
+      expect(component.isCaregiverContext()).toBe(true);
+      expect(component.profile()?.id).toBe('user-c');
+      expect(fixture.nativeElement.textContent).toContain('Maria Kowalska');
+      expect(component.records().length).toBe(1);
+      expect(component.records()[0].userId).toBe('user-c');
+    });
+
+    it('has a back button and hides the access code', () => {
+      expect(component.canShareAccessCode).toBe(false);
+      expect(fixture.nativeElement.textContent).toContain('Wróć do podopiecznych');
+      expect(fixture.nativeElement.querySelector('a[href="/qr-display"]')).toBeNull();
+    });
+
+    it('returns to the caregiver dashboard', () => {
+      component.goBack();
+
+      expect(navigate).toHaveBeenCalledWith('/caregiver-dashboard');
+    });
+
+    it('keeps the access code for the own profile of the caregiver', async () => {
+      await setup('user-a', 'user-a');
+
+      expect(component.isCaregiverContext()).toBe(false);
+      expect(component.canShareAccessCode).toBe(true);
+    });
+
+    it('redirects when the caregiver has no access to the profile', async () => {
+      await setup('user-b', 'user-c');
+
+      expect(navigate).toHaveBeenCalledWith('/senior-dashboard');
+      expect(component.profile()).toBeUndefined();
+    });
   });
 
-  it('renders one patient tile per accessible profile', () => {
-    const tiles = fixture.nativeElement.querySelectorAll(
-      '.patient-tile',
-    ) as NodeListOf<HTMLElement>;
+  it('signs out and returns to the login screen', async () => {
+    await setup('user-b', null);
 
-    expect(tiles.length).toBe(component.profiles().length);
-    // jsdom nie implementuje innerText, więc czytamy textContent
-    expect(tiles[0].textContent).toContain('Jan Kowalski');
-    expect(tiles[0].getAttribute('aria-pressed')).toBe('true');
-  });
+    component.signOut();
 
-  it('renders a card per medical record with its title', () => {
-    const cards = fixture.nativeElement.querySelectorAll('.record-card') as NodeListOf<HTMLElement>;
-
-    expect(cards.length).toBe(2);
-    expect(cards[0].textContent).toContain('Tomografia komputerowa głowy');
-    expect(cards[0].textContent).toContain('dr hab. Marek Mostowiak');
-  });
-
-  it('marks the account of this device in the picker', () => {
-    const badge = fixture.nativeElement.querySelector('.patient-tile__badge') as HTMLElement;
-    expect(badge.textContent).toContain('To urządzenie');
-  });
-
-  it('selects the local account by default and marks it as this device', () => {
-    expect(component.localUserId).toBe('user-b');
-    expect(component.selectedPatientId()).toBe('user-b');
-  });
-
-  it('loads the records of the selected patient', () => {
-    expect(component.records().length).toBe(2);
-    expect(component.records().every((record) => record.userId === 'user-b')).toBe(true);
-  });
-
-  it('falls back to the first accessible profile when the local one is not visible', async () => {
-    // Konto user-a nie ma dostępu do user-b w tabeli mocków
-    localStorage.setItem('app_local_user_id', 'user-a');
-    fixture = TestBed.createComponent(SeniorDashboard);
-    component = fixture.componentInstance;
-    fixture.detectChanges();
-    await flush();
-
-    expect(component.localUserId).toBe('user-a');
-    expect(component.profiles().map((profile) => profile.id)).toEqual(
-      expect.arrayContaining(['user-a', 'user-b', 'user-c']),
-    );
-    expect(component.selectedPatientId()).toBe('user-a');
-  });
-
-  it('switches the records when another patient is chosen', async () => {
-    // Dajemy konto opiekuna, które ma dostęp do trzech profili z mocków
-    localStorage.setItem('app_local_user_id', 'user-a');
-    fixture = TestBed.createComponent(SeniorDashboard);
-    component = fixture.componentInstance;
-    fixture.detectChanges();
-    await flush();
-
-    expect(component.profiles().map((profile) => profile.id)).toEqual(
-      expect.arrayContaining(['user-a', 'user-b', 'user-c']),
-    );
-
-    component.selectPatient('user-c');
-    await flush();
-
-    expect(component.selectedPatientId()).toBe('user-c');
-    expect(component.records().length).toBe(1);
-    expect(component.records()[0].userId).toBe('user-c');
-
-    component.selectPatient('user-b');
-    await flush();
-
-    expect(component.records().length).toBe(2);
-  });
-
-  it('ignores re-selecting the same patient', async () => {
-    component.selectPatient('user-b');
-    await flush();
-
-    expect(component.selectedPatientId()).toBe('user-b');
+    expect(database.hasSession()).toBe(false);
+    expect(navigate).toHaveBeenCalledWith('/login');
   });
 });

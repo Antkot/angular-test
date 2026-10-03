@@ -16,7 +16,7 @@ export const DEFAULT_LOCAL_USER_ID: UserId = 'user-b';
 
 // Ścieżki zależne od sesji - jedyne miejsce, które zna mapowanie rola -> ekran.
 // Ścieżki w app.routes.ts muszą z nimi się zgadzać.
-export const AUTH_ROUTE = '/auth';
+export const AUTH_ROUTE = '/login';
 export const SENIOR_HOME_ROUTE = '/senior-dashboard';
 export const CAREGIVER_HOME_ROUTE = '/caregiver-dashboard';
 
@@ -131,6 +131,22 @@ export class Database {
   /** Rola zalogowanego konta - senior pokazuje kod, opiekun skanuje. */
   getLocalUserRole(): UserRole {
     return this.getLocalUserProfile()?.role ?? 'senior';
+  }
+
+  /**
+   * Logowanie e-mail + hasło. Zwraca konto albo null przy złych danych.
+   * Po sukcesie caller ustawia sesję przez setLocalUserId().
+   */
+  login(email: string, password: string): User | null {
+    const normalizedEmail = email.trim().toLocaleLowerCase();
+    const user = this.getAllUsers().find(
+      (candidate) => candidate.email.toLocaleLowerCase() === normalizedEmail,
+    );
+
+    if (!user || user.passwordHash !== password) {
+      return null;
+    }
+    return user;
   }
 
   /** Ekran startowy: widok pacjenta albo widok opiekuna. */

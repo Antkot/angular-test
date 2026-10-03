@@ -27,6 +27,10 @@
     <button type="submit">Zaloguj się</button>
   </form>
 
+  @if (errorMessage(); as message) {
+    <p role="alert">{{ message }}</p>
+  }
+
   <button type="button" (click)="onGoogleLogin()">
     Zaloguj się przez Google
   </button>

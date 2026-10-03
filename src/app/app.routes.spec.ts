@@ -20,23 +20,23 @@ describe('app.routes', () => {
   it('redirects the root url to the login screen', async () => {
     await router.navigateByUrl('/');
 
-    expect(router.url).toBe('/auth');
+    expect(router.url).toBe('/login');
   });
 
   it('sends a visitor without an account to the login screen', async () => {
     await RouterTestingHarness.create();
 
     await router.navigateByUrl('/senior-dashboard');
-    expect(router.url).toBe('/auth');
+    expect(router.url).toBe('/login');
 
     await router.navigateByUrl('/qr-display');
-    expect(router.url).toBe('/auth');
+    expect(router.url).toBe('/login');
 
     await router.navigateByUrl('/caregiver-dashboard');
-    expect(router.url).toBe('/auth');
+    expect(router.url).toBe('/login');
 
     await router.navigateByUrl('/qr-scanner');
-    expect(router.url).toBe('/auth');
+    expect(router.url).toBe('/login');
   });
 
   it('opens the patient dashboard when an account is signed in', async () => {
@@ -49,7 +49,7 @@ describe('app.routes', () => {
     expect(harness.routeNativeElement?.textContent).toContain('Panel Seniora');
     // Senior ma przycisk otwierający ekran kodu QR
     const link = harness.routeNativeElement?.querySelector('a[href="/qr-display"]');
-    expect(link?.textContent).toContain('Pokaż kod dostępu');
+    expect(link?.textContent).toContain('Pokaż mój kod dostępu');
   });
 
   it('opens the caregiver dashboard when an account is signed in', async () => {
@@ -67,6 +67,6 @@ describe('app.routes', () => {
 
     await router.navigateByUrl('/nie-ma-takiej-strony');
 
-    expect(router.url).toBe('/auth');
+    expect(router.url).toBe('/login');
   });
 });
