@@ -3,6 +3,7 @@ import { AuthSelect } from './both-users/auth-select/auth-select';
 import { RecordForm } from './both-users/record-form/record-form';
 import { RecordDetail } from './both-users/record-detail/record-detail';
 import { QrDisplay } from './both-users/qr-display/qr-display';
+import { Login } from './both-users/login/login';
 import { SeniorDashboard } from './senior/senior-dashboard/senior-dashboard';
 import { CaregiverDashboard } from './full-user/caregiver-dashboard/caregiver-dashboard';
 
@@ -13,6 +14,7 @@ export const routes: Routes = [
   { path: 'record-detail', component: RecordDetail },
   { path: 'senior-dashboard', component: SeniorDashboard },
   { path: 'qr-display', component: QrDisplay },
+  { path: 'login', component: Login },
   // Lazy loaded: the camera library (html5-qrcode) is only needed on this route.
   {
     path: 'qr-scanner',
