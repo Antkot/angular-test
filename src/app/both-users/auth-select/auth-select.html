@@ -1,1 +1,88 @@
-<p>auth-select works!</p>
+<!-- auth-select.html -->
+<main class="account-selection">
+  <header class="account-selection__header">
+    <h1>Wybierz konto</h1>
+  </header>
+
+  <section class="account-selection__grid" aria-label="Dostępne konta">
+    @for (account of accounts(); track account.id) {
+      <a
+        class="account-tile"
+        [routerLink]="['/konto', account.id]"
+        [attr.aria-label]="'Otwórz konto: ' + account.firstName + ' ' + account.lastName"
+      >
+        <span class="account-tile__avatar">
+          @if (account.avatarUrl) {
+            <img
+              [src]="account.avatarUrl"
+              [alt]="'Zdjęcie profilowe: ' + account.firstName + ' ' + account.lastName"
+            />
+          } @else {
+            <span aria-hidden="true">{{ account.initials }}</span>
+          }
+        </span>
+
+        <span class="account-tile__name">
+          {{ account.firstName }} {{ account.lastName }}
+        </span>
+      </a>
+    } @empty {
+      <p class="account-selection__empty">Brak dostępnych kont.</p>
+    }
+
+    <button
+      class="account-tile account-tile--add"
+      type="button"
+      (click)="openAddModal()"
+      aria-label="Dodaj nowe konto"
+    >
+      <span class="account-tile__avatar" aria-hidden="true">+</span>
+      <span class="account-tile__name">Nowy użytkownik</span>
+    </button>
+  </section>
+
+  @if (isAddModalOpen()) {
+    <div
+      class="account-modal-backdrop"
+      role="presentation"
+      (click)="closeOnBackdrop($event)"
+      (keydown.escape)="closeAddModal()"
+    >
+      <section
+        class="account-modal"
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="account-modal-title"
+      >
+        <h2 id="account-modal-title">Dodaj konto</h2>
+
+        @if (addMode() === 'choice') {
+          <div class="account-modal__choices">
+            <button type="button" (click)="chooseLocal()">Lokalny</button>
+            <button type="button" (click)="chooseGuardian()">Opiekun</button>
+          </div>
+        } @else {
+          <form (submit)="createLocalAccount($event)">
+            <label for="firstName">Imię</label>
+            <input id="firstName" name="firstName" type="text" autocomplete="given-name" required />
+
+            <label for="lastName">Nazwisko</label>
+            <input id="lastName" name="lastName" type="text" autocomplete="family-name" required />
+
+            <button type="submit">Utwórz konto</button>
+            <button type="button" (click)="closeAddModal()">Anuluj</button>
+          </form>
+        }
+
+        <button
+          class="account-modal__close"
+          type="button"
+          (click)="closeAddModal()"
+          aria-label="Zamknij okno"
+        >
+          Zamknij
+        </button>
+      </section>
+    </div>
+  }
+</main>
