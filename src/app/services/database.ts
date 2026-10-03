@@ -1,4 +1,3 @@
-// src/app/services/database.ts
 import { Injectable } from '@angular/core';
 import { Observable, of } from 'rxjs';
 import { delay } from 'rxjs/operators';
@@ -10,31 +9,74 @@ import { MOCK_USERS, MOCK_ACCESS, MOCK_RECORDS } from '../data/mock-db';
 })
 export class Database {
 
-  constructor() { }
+  private recordsKey = 'app_medical_records';
 
-  // 1. Zwraca profile użytkowników, do których dany zalogowany użytkownik ma dostęp
-  // (Np. dla User A zwróci profil A, B i C. Dla User B zwróci tylko B).
+  constructor() {
+    this.initStorage();
+  }
+
+  // Inicjalizacja: jeśli w localStorage nie ma jeszcze rekordów, wrzucamy tam nasze mocki
+  private initStorage(): void {
+    if (!localStorage.getItem(this.recordsKey)) {
+      localStorage.setItem(this.recordsKey, JSON.stringify(MOCK_RECORDS));
+    }
+  }
+
+  // Pobieranie aktualnych rekordów (z uwzględnieniem localStorage)
+  private getStoredRecords(): MedicalRecord[] {
+    const data = localStorage.getItem(this.recordsKey);
+    return data ? JSON.parse(data) : MOCK_RECORDS;
+  }
+
+  // Zapisywanie rekordów do localStorage
+  private saveRecords(records: MedicalRecord[]): void {
+    localStorage.setItem(this.recordsKey, JSON.stringify(records));
+  }
+
+  // --- METODY PUBLICZNE DLA KOMPONENTÓW ---
+
+  // 1. Zwraca profile użytkowników, do których dany użytkownik ma dostęp
   getAccessibleProfiles(currentUserId: string): Observable<User[]> {
-    // Znajdujemy ID kont, do których currentUserId ma uprawnienia
     const allowedUserIds = MOCK_ACCESS
       .filter(acc => acc.grantedToUserId === currentUserId)
       .map(acc => acc.userId);
 
-    // Wyciągamy pełne obiekty użytkowników pasujące do tych ID
     const profiles = MOCK_USERS.filter(user => allowedUserIds.includes(user.id));
-
-    return of(profiles).pipe(delay(300));
+    return of(profiles).pipe(delay(200));
   }
 
-  // 2. Zwraca dokumentację medyczną dla wybranego profilu podopiecznego
+  // 2. Pobiera badania dla konkretnego użytkownika
   getMedicalRecordsByUserId(userId: string): Observable<MedicalRecord[]> {
-    const userRecords = MOCK_RECORDS.filter(record => record.userId === userId);
-    return of(userRecords).pipe(delay(300));
+    const allRecords = this.getStoredRecords();
+    const userRecords = allRecords.filter(record => record.userId === userId);
+    return of(userRecords).pipe(delay(200));
   }
 
-  // 3. Metoda do dodawania nowego badania (symulacja zapisu do bazy)
-  addMedicalRecord(newRecord: MedicalRecord): Observable<boolean> {
-    MOCK_RECORDS.unshift(newRecord); // Dodajemy na początek tablicy
+  // 3. DODAWANIE nowego badania (z plikiem/zdjęciem lub bez)
+  addMedicalRecord(newRecordData: Omit<MedicalRecord, 'id'>): Observable<MedicalRecord> {
+    const allRecords = this.getStoredRecords();
+
+    // Generujemy unikalne ID (np. timestamp)
+    const newRecord: MedicalRecord = {
+      ...newRecordData,
+      id: 'rec-' + Date.now()
+    };
+
+    allRecords.unshift(newRecord); // Dodajemy na początek listy
+    this.saveRecords(allRecords);
+
+    return of(newRecord).pipe(delay(300));
+  }
+
+  // 4. EDYCJA istniejącego badania (np. dopisanie tagów, notatek)
+  updateMedicalRecord(updatedRecord: MedicalRecord): Observable<boolean> {
+    let allRecords = this.getStoredRecords();
+
+    allRecords = allRecords.map(record =>
+      record.id === updatedRecord.id ? updatedRecord : record
+    );
+
+    this.saveRecords(allRecords);
     return of(true).pipe(delay(300));
   }
 }
