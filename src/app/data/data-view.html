@@ -1,0 +1,121 @@
+<div class="data-view">
+  <header class="data-view__header">
+    <h1>Baza danych</h1>
+    <p class="data-view__meta">
+      {{ users().length }} kont · {{ records().length }} badań · {{ access().length }} uprawnień
+    </p>
+  </header>
+
+  @if (isLoading()) {
+    <p class="data-view__loading">Ładowanie danych z bazy...</p>
+  } @else {
+    <!-- KONTO LOKALNE = PROFIL W KODZIE QR TEGO URZĄDZENIA -->
+    <section class="panel">
+      <h2 class="panel__title">Konto lokalne</h2>
+      <p class="panel__hint">Profil pokazywany w kodzie QR na ekranie „Weryfikacja użytkownika”.</p>
+
+      <label class="field">
+        <span class="field__label">Konto tego urządzenia</span>
+        <select class="field__control" (change)="onLocalUserChange($event)">
+          @for (user of users(); track user.id) {
+            <option [value]="user.id" [selected]="user.id === localUserId()">
+              {{ user.firstName }} {{ user.lastName }} ({{ user.id }})
+            </option>
+          }
+        </select>
+      </label>
+    </section>
+
+    <!-- UŻYTKOWNICY -->
+    <section class="panel">
+      <h2 class="panel__title">Użytkownicy</h2>
+      <table class="table">
+        <thead>
+          <tr>
+            <th>ID</th>
+            <th>Imię i nazwisko</th>
+            <th>E-mail</th>
+            <th>Inicjały</th>
+            <th>Badania</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (user of users(); track user.id) {
+            <tr [class.is-local]="user.id === localUserId()">
+              <td>
+                <code>{{ user.id }}</code>
+              </td>
+              <td>{{ user.firstName }} {{ user.lastName }}</td>
+              <td>{{ user.email }}</td>
+              <td>{{ user.initials }}</td>
+              <td>{{ recordCount(user.id) }}</td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </section>
+
+    <!-- UPRAWNIENIA -->
+    <section class="panel">
+      <h2 class="panel__title">Uprawnienia</h2>
+      <p class="panel__hint">Wynik skanowania kodu QR zapisuje się tutaj jako nowy wpis.</p>
+      <table class="table">
+        <thead>
+          <tr>
+            <th>Profil</th>
+            <th>Dostęp otrzymał</th>
+            <th>Źródło</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (grant of access(); track grant.id) {
+            <tr>
+              <td>{{ userName(grant.userId) }}</td>
+              <td>{{ userName(grant.grantedToUserId) }}</td>
+              <td>{{ isQrGrant(grant) ? 'QR' : 'mock' }}</td>
+            </tr>
+          } @empty {
+            <tr>
+              <td colspan="3">Brak uprawnień.</td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </section>
+
+    <!-- DOKUMENTACJA MEDYCZNA -->
+    <section class="panel">
+      <h2 class="panel__title">Dokumentacja medyczna</h2>
+      <table class="table">
+        <thead>
+          <tr>
+            <th>Tytuł</th>
+            <th>Pacjent</th>
+            <th>Lekarz</th>
+            <th>Data</th>
+            <th>Tagi</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (record of records(); track record.id) {
+            <tr>
+              <td>{{ record.title }}</td>
+              <td>{{ userName(record.userId) }}</td>
+              <td>{{ record.doctor }}</td>
+              <td>{{ record.date }}</td>
+              <td>
+                @for (tag of record.tags; track tag) {
+                  <span class="tag">{{ tag }}</span>
+                }
+              </td>
+            </tr>
+          } @empty {
+            <tr>
+              <td colspan="5">Brak badań w bazie.</td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </section>
+  }
+</div>

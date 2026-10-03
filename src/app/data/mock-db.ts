@@ -9,7 +9,10 @@ export const MOCK_USERS: User[] = [
     passwordHash: 'haslo123',
     firstName: 'Anna',
     lastName: 'Nowak (Opiekun)',
-    initials: 'AN'
+    initials: 'AN',
+    role: 'caregiver',
+    // Podopieczni Anny - ten sam zestaw co w tabeli MOCK_ACCESS poniżej.
+    patientIds: ['user-b', 'user-c'],
   },
   {
     id: 'user-b',
@@ -17,7 +20,8 @@ export const MOCK_USERS: User[] = [
     passwordHash: 'haslo123',
     firstName: 'Jan',
     lastName: 'Kowalski (Senior)',
-    initials: 'JK'
+    initials: 'JK',
+    role: 'senior',
   },
   {
     id: 'user-c',
@@ -25,8 +29,9 @@ export const MOCK_USERS: User[] = [
     passwordHash: 'haslo123',
     firstName: 'Maria',
     lastName: 'Kowalska (Babcia)',
-    initials: 'MK'
-  }
+    initials: 'MK',
+    role: 'senior',
+  },
 ];
 
 // 2. Tabela uprawnień (Kto co widzi)
@@ -40,7 +45,7 @@ export const MOCK_ACCESS: UserAccess[] = [
   { id: 'acc-4', userId: 'user-b', grantedToUserId: 'user-b' },
 
   // Użytkownik C widzi tylko siebie
-  { id: 'acc-5', userId: 'user-c', grantedToUserId: 'user-c' }
+  { id: 'acc-5', userId: 'user-c', grantedToUserId: 'user-c' },
 ];
 
 // 3. Badania medyczne przypisane do konkretnych użytkowników (B i C)
@@ -54,7 +59,7 @@ export const MOCK_RECORDS: MedicalRecord[] = [
     date: '12.04.2026',
     tags: ['Neurologia', 'Pilne', 'Tomografia'],
     notes: 'Zalecono powtórzenie za 6 miesięcy.',
-    hasAttachments: true
+    hasAttachments: true,
   },
   {
     id: 'rec-2',
@@ -65,7 +70,7 @@ export const MOCK_RECORDS: MedicalRecord[] = [
     date: '02.05.2026',
     tags: ['Laboratorium', 'Profilaktyka'],
     notes: 'Wyniki w normie, lekki spadek żelaza.',
-    hasAttachments: false
+    hasAttachments: false,
   },
   {
     id: 'rec-3',
@@ -76,6 +81,6 @@ export const MOCK_RECORDS: MedicalRecord[] = [
     date: '20.03.2026',
     tags: ['Kardiologia', 'USG'],
     notes: 'Ciśnienie stabilne, brak zmian miażdżycowych.',
-    hasAttachments: true
-  }
+    hasAttachments: true,
+  },
 ];

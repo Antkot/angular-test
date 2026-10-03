@@ -1,24 +1,31 @@
-<section class="qr-scanner">
-  <h1>Skanuj kod pacjenta</h1>
+<app-verify-header />
 
-  <div id="qr-reader" #qrReader></div>
+<main class="verify-view">
+  <div class="scanner-window" [class.is-error]="status() === 'error'">
+    <div id="qr-reader" #qrReader class="scanner-viewport"></div>
 
-  @switch (status()) {
-    @case ('starting') {
-      <p class="hint">Uruchamiam kamerę...</p>
-    }
-    @case ('scanning') {
-      <p class="hint">Zeskanuj, aby uzyskać dostęp do profilu</p>
-    }
-    @case ('success') {
-      <p class="hint">Odczytano kod - przekierowanie do pulpitu opiekuna...</p>
-    }
-    @case ('error') {
-      <p class="hint">Skaner jest niedostępny</p>
-    }
-  }
+    @if (status() === 'error') {
+      <p class="scanner-error">{{ errorMessage() }}</p>
+    } @else {
+      <div class="scan-frame" aria-hidden="true">
+        <span class="corner top-left"></span>
+        <span class="corner top-right"></span>
+        <span class="corner bottom-left"></span>
+        <span class="corner bottom-right"></span>
+      </div>
 
-  @if (errorMessage(); as message) {
-    <p class="error">{{ message }}</p>
-  }
-</section>
+      @if (status() === 'starting') {
+        <p class="scanner-hint">Uruchamiam kamerę...</p>
+      }
+    }
+  </div>
+
+  <p class="instruction">
+    @if (caregiver(); as account) {
+      Skanujesz jako: {{ account.firstName }} {{ account.lastName }}<br />
+    }
+    Zeskanuj aparatem kod QR<br />
+    w aplikacji osoby<br />
+    udostępniającej dane
+  </p>
+</main>

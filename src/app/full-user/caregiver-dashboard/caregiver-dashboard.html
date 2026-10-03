@@ -1,1 +1,49 @@
-<p>caregiver-dashboard works!</p>
+<div class="caregiver-dashboard">
+  <header class="caregiver-dashboard__header">
+    <div>
+      <h2>Panel Opiekuna</h2>
+      @if (self(); as account) {
+        <p class="hint">{{ account.firstName }} {{ account.lastName }} ({{ account.id }})</p>
+      }
+    </div>
+
+    <div class="caregiver-dashboard__actions">
+      <!-- Opiekun dodaje kolejnych podopiecznych skanując ich kody QR -->
+      <a class="action-button" routerLink="/qr-scanner">Zeskanuj pacjenta</a>
+      <button type="button" class="action-button action-button--ghost" (click)="signOut()">
+        Zmień konto
+      </button>
+    </div>
+  </header>
+
+  @if (isLoading()) {
+    <p class="hint">Ładowanie podopiecznych...</p>
+  } @else {
+    <section class="section">
+      <h3 class="section__title">
+        Podopieczni
+        <span class="section__accent">{{ dependents().length }}</span>
+      </h3>
+
+      <div class="patient-picker">
+        @for (dependent of dependents(); track dependent.id) {
+          <article class="patient-tile">
+            <span class="patient-tile__avatar" aria-hidden="true">{{ dependent.initials }}</span>
+
+            <span>
+              <span class="patient-tile__name">
+                {{ dependent.firstName }} {{ dependent.lastName }}
+              </span>
+              <span class="patient-tile__badge">{{ dependent.id }}</span>
+            </span>
+          </article>
+        } @empty {
+          <p class="hint">
+            Brak podopiecznych. Zeskanuj kod QR pacjenta, aby dodać jego profil - możesz
+            powtarzać to dla kolejnych osób.
+          </p>
+        }
+      </div>
+    </section>
+  }
+</div>

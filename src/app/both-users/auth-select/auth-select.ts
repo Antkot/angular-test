@@ -1,19 +1,43 @@
-// auth-select.ts
-import { Component, inject, signal } from '@angular/core';
-import { Router, RouterLink } from '@angular/router';
+// auth-select.ts - ekran logowania/rejestracji: wybór konta albo nowe konto + rola.
+import { Component, OnInit, inject, signal } from '@angular/core';
+import { Router } from '@angular/router';
+import { Database } from '../../services/database';
+import { User, UserRole } from '../../models/app.models';
 
 @Component({
   selector: 'app-auth-select',
   standalone: true,
-  imports: [RouterLink],
+  imports: [],
   templateUrl: './auth-select.html',
 })
-export class AuthSelect {
+export class AuthSelect implements OnInit {
+  private readonly database = inject(Database);
   private readonly router = inject(Router);
 
-  readonly accounts = signal<any[]>([]);
+  readonly accounts = signal<User[]>([]);
+  readonly isLoading = signal(true);
   readonly isAddModalOpen = signal(false);
-  readonly addMode = signal<'choice' | 'local'>('choice');
+  /** 'choice' = ekran wyboru roli, wartość inna niż 'choice' = wybrana rola konta. */
+  readonly addMode = signal<'choice' | UserRole>('choice');
+
+  ngOnInit(): void {
+    this.database.getUsers().subscribe({
+      next: (users) => {
+        this.accounts.set(users);
+        this.isLoading.set(false);
+      },
+      error: () => this.isLoading.set(false),
+    });
+  }
+
+  /**
+   * Logowanie: wybrane konto zostaje profilem tego urządzenia (sesją),
+   * a ekran zależy od roli - senior ląduje na swoim widoku, opiekun na swoim.
+   */
+  signIn(account: User): void {
+    this.database.setLocalUserId(account.id);
+    void this.router.navigateByUrl(this.database.getHomeRoute(account.role));
+  }
 
   openAddModal(): void {
     this.addMode.set('choice');
@@ -25,13 +49,8 @@ export class AuthSelect {
     this.addMode.set('choice');
   }
 
-  chooseLocal(): void {
-    this.addMode.set('local');
-  }
-
-  chooseGuardian(): void {
-    this.closeAddModal();
-    void this.router.navigate(['/qr-scanner']);
+  chooseRole(role: UserRole): void {
+    this.addMode.set(role);
   }
 
   closeOnBackdrop(event: MouseEvent): void {
@@ -40,29 +59,28 @@ export class AuthSelect {
     }
   }
 
-  createLocalAccount(event: SubmitEvent): void {
+  /** Rejestracja nowego konta: zapis w bazie, zalogowanie i przejście do widoku roli. */
+  createAccount(event: SubmitEvent): void {
     event.preventDefault();
+
+    const role = this.addMode();
+    if (role === 'choice') {
+      return;
+    }
 
     const form = event.currentTarget as HTMLFormElement;
     const formData = new FormData(form);
     const firstName = String(formData.get('firstName') ?? '').trim();
     const lastName = String(formData.get('lastName') ?? '').trim();
+    const email = String(formData.get('email') ?? '').trim();
 
     if (!firstName || !lastName) {
       return;
     }
 
-    this.accounts.update((accounts) => [
-      ...accounts,
-      {
-        id: globalThis.crypto?.randomUUID?.() ?? String(Date.now()),
-        firstName,
-        lastName,
-        initials: `${firstName.charAt(0)}${lastName.charAt(0)}`.toLocaleUpperCase(),
-        avatarUrl: null,
-      },
-    ]);
-
+    const account = this.database.registerUser({ firstName, lastName, email, role });
+    this.accounts.update((accounts) => [...accounts, account]);
     this.closeAddModal();
+    this.signIn(account);
   }
 }

@@ -8,39 +8,35 @@ import {
   viewChild,
 } from '@angular/core';
 import { Router } from '@angular/router';
+import { firstValueFrom } from 'rxjs';
 import { Html5Qrcode } from 'html5-qrcode';
-import { PatientService } from '../../services/patient.service';
+import { VerifyHeader } from '../../shared/verify-header/verify-header';
+import { Database } from '../../services/database';
 
-/** Keeps only the patient id from whatever the QR code carries. */
+/** Largest scan area in px - matches `.scan-frame` in the stylesheet. */
+const MAX_SCAN_AREA = 240;
+
+/** Zawartość kodu QR to id profilu pacjenta - zostawiamy samo id. */
 function extractPatientId(decodedText: string): string | null {
-  const text = decodedText.trim();
-  if (!text) {
-    return null;
-  }
-  if (text.startsWith('{')) {
-    try {
-      const id = (JSON.parse(text) as { id?: unknown }).id;
-      return typeof id === 'string' && id.trim() ? id.trim() : null;
-    } catch {
-      return null;
-    }
-  }
-  const fromUrl = /[?&](?:patient|id)=([^&]+)/.exec(text);
-  return decodeURIComponent(fromUrl ? fromUrl[1] : text);
+  const id = decodedText.trim();
+  return id || null;
 }
 
 @Component({
   selector: 'app-qr-scanner',
+  imports: [VerifyHeader],
   styleUrl: './qr-scanner.scss',
   templateUrl: './qr-scanner.html',
 })
 export class QrScanner implements OnDestroy {
-  private readonly patientService = inject(PatientService);
+  private readonly database = inject(Database);
   private readonly router = inject(Router);
   private readonly reader = viewChild.required<ElementRef<HTMLDivElement>>('qrReader');
 
   readonly status = signal<'starting' | 'scanning' | 'success' | 'error'>('starting');
   readonly errorMessage = signal<string | null>(null);
+  /** Konto skanujące - do niego dopisujemy pacjenta po odczytaniu kodu. */
+  readonly caregiver = signal(this.database.getLocalUserProfile());
 
   private scanner: Html5Qrcode | null = null;
   private handled = false;
@@ -59,8 +55,16 @@ export class QrScanner implements OnDestroy {
     try {
       await scanner.start(
         { facingMode: 'environment' },
-        { fps: 10, qrbox: { width: 240, height: 240 }, aspectRatio: 1 },
-        (decodedText) => this.onScanSuccess(decodedText),
+        {
+          fps: 10,
+          // Square viewport, so the white brackets in the overlay match the scan area.
+          aspectRatio: 1,
+          qrbox: (viewfinderWidth, viewfinderHeight) => {
+            const size = Math.min(MAX_SCAN_AREA, viewfinderWidth * 0.6, viewfinderHeight * 0.6);
+            return { width: size, height: size };
+          },
+        },
+        (decodedText) => void this.onScanSuccess(decodedText),
         // Called for every frame without a readable code - expected while scanning.
         () => void 0,
       );
@@ -82,11 +86,13 @@ export class QrScanner implements OnDestroy {
       this.errorMessage.set('Nierozpoznany kod QR - zeskanuj kod wyświetlony przez seniora.');
       return;
     }
-    if (patientId === this.patientService.getLocalPatientId()) {
+    if (patientId === this.database.getLocalUserId()) {
       this.errorMessage.set('To jest Twój własny profil - poproś o kod innego pacjenta.');
       return;
     }
-    if (!this.patientService.addSharedPatientById(patientId)) {
+
+    const granted = await firstValueFrom(this.database.addPatient(patientId));
+    if (!granted) {
       this.errorMessage.set('Nie udało się dodać pacjenta - zeskanuj kod ponownie.');
       return;
     }

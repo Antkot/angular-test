@@ -1,39 +1,94 @@
-<div style="padding: 20px; font-family: sans-serif; color: #ffffff;">
-  <h2>Panel Seniora - Historia badań</h2>
+<div class="senior-dashboard">
+  <header class="senior-dashboard__header">
+    <div>
+      <h2>Panel Seniora - Historia badań</h2>
+      @if (localUserId) {
+        <p class="hint">{{ userName(localUserId) }}</p>
+      }
+    </div>
 
-  @if (isLoading) {
-  <p style="color: #aaaaaa;">Ładowanie danych z bazy...</p>
-  }
-  @else {
-  <div style="display: flex; flex-direction: column; gap: 15px; margin-top: 20px;">
+    <div class="senior-dashboard__actions">
+      <!-- Senior udostępnia swój profil opiekunowi przez kod QR -->
+      <a class="action-button" routerLink="/qr-display">Pokaż kod dostępu</a>
+      <button type="button" class="action-button action-button--ghost" (click)="signOut()">
+        Zmień konto
+      </button>
+    </div>
+  </header>
 
-    @for (record of records; track record.id) {
-    <div style="background-color: #1e1e1e; border: 1px solid #333333; border-radius: 12px; padding: 15px; box-shadow: 0 4px 6px rgba(0,0,0,0.3);">
+  @if (isLoading()) {
+    <p class="hint">Ładowanie kont...</p>
+  } @else {
+    <!-- KROK 1: wybór pacjenta -->
+    <section class="section">
+      <h3 class="section__title">Wybierz pacjenta</h3>
 
-      <h3 style="margin-top: 0; margin-bottom: 5px; color: #ffffff;">{{ record.title }}</h3>
+      <div class="patient-picker">
+        @for (profile of profiles(); track profile.id) {
+          <button
+            type="button"
+            class="patient-tile"
+            [class.patient-tile--active]="profile.id === selectedPatientId()"
+            (click)="selectPatient(profile.id)"
+            [attr.aria-pressed]="profile.id === selectedPatientId()"
+            [attr.aria-label]="'Pokaż badania: ' + profile.firstName + ' ' + profile.lastName"
+          >
+            <span class="patient-tile__avatar" aria-hidden="true">{{ profile.initials }}</span>
 
-      <div style="font-size: 14px; color: #bbbbbb; margin-bottom: 10px;">
-        <span style="margin-right: 15px;">📅 {{ record.date }}</span>
-        <span>👨‍⚕️ dr {{ record.doctor }}</span>
-      </div>
-
-      <p style="font-size: 14px; color: #dddddd;">{{ record.description }}</p>
-
-      @if (record.tags.length > 0) {
-      <div style="display: flex; gap: 8px; margin-top: 10px;">
-        @for (tag of record.tags; track tag) {
-        <span style="background-color: #552222; color: #ff9999; padding: 4px 10px; border-radius: 12px; font-size: 12px; font-weight: bold;">
-          {{ tag }}
-        </span>
+            <span>
+              <span class="patient-tile__name">{{ profile.firstName }} {{ profile.lastName }}</span>
+              @if (profile.id === localUserId) {
+                <span class="patient-tile__badge">To urządzenie</span>
+              }
+            </span>
+          </button>
+        } @empty {
+          <p class="hint">Brak kont z dostępem.</p>
         }
       </div>
+    </section>
+
+    <!-- KROK 2: badania wybranego pacjenta -->
+    <section class="section">
+      <h3 class="section__title">
+        Badania
+        @if (selectedPatientId(); as patientId) {
+          <span class="section__accent">{{ userName(patientId) }}</span>
+        }
+      </h3>
+
+      @if (isLoadingRecords()) {
+        <p class="hint">Ładowanie badań...</p>
+      } @else {
+        <div class="records-list">
+          @for (record of records(); track record.id) {
+            <article class="record-card">
+              <h3 class="record-card__title">{{ record.title }}</h3>
+
+              <div class="record-card__meta">
+                <span>📅 {{ record.date }}</span>
+                <span>👨‍⚕️ {{ record.doctor }}</span>
+              </div>
+
+              <p class="record-card__description">{{ record.description }}</p>
+
+              @if (record.notes) {
+                <p class="record-card__description">{{ record.notes }}</p>
+              }
+
+              @if (record.tags.length > 0) {
+                <div class="record-card__tags">
+                  @for (tag of record.tags; track tag) {
+                    <span class="tag">{{ tag }}</span>
+                  }
+                </div>
+              }
+            </article>
+          } @empty {
+            <p class="hint">Brak historii medycznej dla tego pacjenta.</p>
+          }
+        </div>
       }
-
-    </div>
-    } @empty {
-    <p style="color: #aaaaaa;">Brak historii medycznej dla tego pacjenta.</p>
-    }
-
-  </div>
+    </section>
   }
 </div>
