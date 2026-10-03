@@ -1,0 +1,24 @@
+<section class="qr-scanner">
+  <h1>Skanuj kod pacjenta</h1>
+
+  <div id="qr-reader" #qrReader></div>
+
+  @switch (status()) {
+    @case ('starting') {
+      <p class="hint">Uruchamiam kamerę...</p>
+    }
+    @case ('scanning') {
+      <p class="hint">Zeskanuj, aby uzyskać dostęp do profilu</p>
+    }
+    @case ('success') {
+      <p class="hint">Odczytano kod - przekierowanie do pulpitu opiekuna...</p>
+    }
+    @case ('error') {
+      <p class="hint">Skaner jest niedostępny</p>
+    }
+  }
+
+  @if (errorMessage(); as message) {
+    <p class="error">{{ message }}</p>
+  }
+</section>
