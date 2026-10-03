@@ -1,0 +1,38 @@
+<main>
+  <h1>Logowanie</h1>
+
+  <form (submit)="onLogin($event)">
+    <div>
+      <label for="email">Email</label>
+      <input
+        id="email"
+        name="email"
+        type="email"
+        autocomplete="email"
+        required
+      />
+    </div>
+
+    <div>
+      <label for="password">Hasło</label>
+      <input
+        id="password"
+        name="password"
+        type="password"
+        autocomplete="current-password"
+        required
+      />
+    </div>
+
+    <button type="submit">Zaloguj się</button>
+  </form>
+
+  <button type="button" (click)="onGoogleLogin()">
+    Zaloguj się przez Google
+  </button>
+
+  <p>
+    Nie masz konta?
+    <a routerLink="/register">Rejestracja</a>
+  </p>
+</main>
