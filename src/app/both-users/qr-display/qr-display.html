@@ -1,25 +1,24 @@
-<section class="qr-display">
-  <h1>Kod dostępu do profilu</h1>
+<app-verify-header />
 
-  @if (localPatient(); as patient) {
-    <p class="patient-name">{{ patient.name }}</p>
-  }
-
+<main class="verify-view">
   <canvas
     #qrCanvas
-    width="280"
-    height="280"
+    width="260"
+    height="260"
     role="img"
     aria-label="Kod QR profilu pacjenta"
   ></canvas>
 
-  <p class="hint">Zeskanuj, aby uzyskać dostęp do profilu</p>
-
-  <p class="patient-id">
-    Identyfikator: <code>{{ patientId }}</code>
+  <p class="instruction">
+    @if (patient(); as account) {
+      {{ account.firstName }} {{ account.lastName }}
+    }
+    <br />
+    Zeskanuj ten kod QR<br />
+    aplikacją opiekuna
   </p>
 
   @if (error(); as message) {
     <p class="error">{{ message }}</p>
   }
-</section>
+</main>

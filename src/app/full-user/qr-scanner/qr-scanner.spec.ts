@@ -1,6 +1,6 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { provideRouter, Router } from '@angular/router';
-import { PatientService } from '../../services/patient.service';
+import { Database } from '../../services/database';
 import { QrScanner } from './qr-scanner';
 
 const scannerMock = vi.hoisted(() => ({
@@ -35,7 +35,13 @@ describe('QrScanner', () => {
   let fixture: ComponentFixture<QrScanner>;
   let component: QrScanner;
   let router: Router;
-  let patientService: PatientService;
+  let database: Database;
+
+  // Database symuluje opóźnienie (delay), więc trzeba poczekać na makrotaski
+  const flush = async () => {
+    await new Promise((resolve) => setTimeout(resolve, 350));
+    await fixture.whenStable();
+  };
 
   beforeEach(async () => {
     scannerMock.startError = undefined;
@@ -48,7 +54,7 @@ describe('QrScanner', () => {
     fixture = TestBed.createComponent(QrScanner);
     component = fixture.componentInstance;
     router = TestBed.inject(Router);
-    patientService = TestBed.inject(PatientService);
+    database = TestBed.inject(Database);
     fixture.detectChanges();
     await fixture.whenStable();
   });
@@ -59,15 +65,38 @@ describe('QrScanner', () => {
     expect(component.status()).toBe('scanning');
   });
 
-  it('shares the scanned patient, stops the camera and redirects', async () => {
+  it('grants access, stops the camera and redirects after a valid scan', async () => {
     const navigate = vi.spyOn(router, 'navigate').mockResolvedValue(true);
 
-    scannerMock.onSuccess?.('senior-42');
-    await fixture.whenStable();
+    // 'user-c' to konto obcej pacjentki - konto lokalne domyślnie to 'user-b'
+    scannerMock.onSuccess?.('user-c');
+    await flush();
 
-    expect(patientService.sharedPatients().map((patient) => patient.id)).toEqual(['senior-42']);
+    expect(database.hasAccess('user-c', 'user-b')).toBe(true);
+    expect(database.getPatientIds('user-b')).toEqual(['user-c']);
     expect(scannerMock.stop).toHaveBeenCalled();
     expect(navigate).toHaveBeenCalledWith(['/caregiver-dashboard']);
+  });
+
+  it('refuses a QR code pointing at the local profile', async () => {
+    const navigate = vi.spyOn(router, 'navigate').mockResolvedValue(true);
+
+    scannerMock.onSuccess?.(database.getLocalUserId());
+    await flush();
+
+    expect(component.errorMessage()).toContain('Twój własny profil');
+    expect(navigate).not.toHaveBeenCalled();
+    expect(component.status()).toBe('scanning');
+  });
+
+  it('refuses an unknown id without redirecting', async () => {
+    const navigate = vi.spyOn(router, 'navigate').mockResolvedValue(true);
+
+    scannerMock.onSuccess?.('nie-ma-takiego-konta');
+    await flush();
+
+    expect(component.errorMessage()).toContain('Nie udało się dodać pacjenta');
+    expect(navigate).not.toHaveBeenCalled();
   });
 
   it('reports a camera failure instead of throwing', async () => {

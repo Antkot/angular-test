@@ -1,18 +1,23 @@
 import { Component, ElementRef, afterNextRender, inject, signal, viewChild } from '@angular/core';
 import { toCanvas } from 'qrcode';
-import { PatientService } from '../../services/patient.service';
+import { VerifyHeader } from '../../shared/verify-header/verify-header';
+import { Database } from '../../services/database';
+import { User } from '../../models/app.models';
 
 @Component({
   selector: 'app-qr-display',
+  imports: [VerifyHeader],
   styleUrl: './qr-display.scss',
   templateUrl: './qr-display.html',
 })
 export class QrDisplay {
-  private readonly patientService = inject(PatientService);
+  private readonly database = inject(Database);
   private readonly canvas = viewChild.required<ElementRef<HTMLCanvasElement>>('qrCanvas');
 
-  readonly patientId = this.patientService.getLocalPatientId();
-  readonly localPatient = this.patientService.localPatient;
+  /** Zalogowany profil - to jego id kodujemy i jego pokazujemy opiekunowi. */
+  readonly patient = signal<User | undefined>(this.database.getLocalUserProfile());
+  /** Payload encoded in the QR code - id of the profile shared by this device. */
+  readonly patientId = this.database.getLocalUserId();
   readonly error = signal<string | null>(null);
 
   constructor() {
@@ -22,9 +27,9 @@ export class QrDisplay {
   private async renderQrCode(): Promise<void> {
     try {
       await toCanvas(this.canvas().nativeElement, this.patientId, {
-        width: 280,
+        width: 260,
         margin: 2,
-        color: { dark: '#0f172a', light: '#ffffff' },
+        color: { dark: '#111827', light: '#ffffff' },
       });
     } catch {
       this.error.set('Nie udało się wygenerować kodu QR.');
