@@ -1,0 +1,134 @@
+:host {
+  display: flex;
+  flex-direction: column;
+}
+
+.date-field {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  padding: 10px 12px;
+  border: 1px solid var(--md-border);
+  border-radius: var(--md-radius-sm);
+  background: #ffffff;
+  color: var(--md-text);
+  font-family: inherit;
+  font-size: 14px;
+  text-align: left;
+  cursor: pointer;
+}
+
+.date-field:hover {
+  border-color: var(--md-border-strong);
+}
+
+.date-field svg {
+  width: 16px;
+  height: 16px;
+  fill: none;
+  stroke: var(--md-border-strong);
+  stroke-width: 1.7;
+  stroke-linecap: round;
+}
+
+/* Wybór tagów */
+.tag-picker {
+  margin-top: 8px;
+  padding: 12px;
+  border: 1px solid var(--md-border);
+  border-radius: var(--md-radius);
+  background: var(--md-surface);
+}
+
+.tag-picker__label {
+  display: block;
+  margin-bottom: 8px;
+  color: var(--md-text-light);
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.tag-picker .input {
+  flex: 1;
+}
+
+/* Załączniki */
+.attachment {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px;
+  border: 1px solid var(--md-border);
+  border-radius: var(--md-radius-sm);
+  background: var(--md-surface);
+  font-size: 12px;
+}
+
+.attachment__icon svg {
+  width: 16px;
+  height: 16px;
+  fill: none;
+  stroke: var(--md-icon);
+  stroke-width: 1.6;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.attachment__name {
+  flex: 1;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.attachment__remove {
+  border: 0;
+  background: transparent;
+  color: var(--md-text-light);
+  font-size: 18px;
+  line-height: 1;
+  cursor: pointer;
+}
+
+.attachment__remove:hover {
+  color: var(--md-danger);
+}
+
+/* FAB z menu załączników */
+.fab-wrap {
+  position: absolute;
+  right: 20px;
+  bottom: 24px;
+  z-index: 20;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 12px;
+}
+
+.fab-menu__item {
+  display: inline-flex;
+  align-items: center;
+  padding: 10px 20px;
+  border: 1px solid var(--md-border);
+  border-radius: var(--md-radius-sm);
+  background: #ffffff;
+  color: var(--md-text);
+  font-size: 12px;
+  font-weight: 600;
+  white-space: nowrap;
+  box-shadow: 0 4px 6px -1px rgb(0 0 0 / 10%);
+  cursor: pointer;
+}
+
+.danger-link {
+  margin-top: 16px;
+  border: 0;
+  background: transparent;
+  color: var(--md-danger);
+  font-size: 12px;
+  cursor: pointer;
+}

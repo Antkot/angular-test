@@ -1,5 +1,7 @@
 import { Component, OnInit, inject, signal } from '@angular/core';
 import { Router, RouterLink } from '@angular/router';
+import { TopBar } from '../../shared/top-bar/top-bar';
+import { AvatarColor, avatarColor } from '../../data/tag-colors';
 import { AUTH_ROUTE, Database, SENIOR_HOME_ROUTE } from '../../services/database';
 import { User, UserId } from '../../models/app.models';
 
@@ -10,7 +12,7 @@ interface RosterEntry {
 }
 
 @Component({
-  imports: [RouterLink],
+  imports: [RouterLink, TopBar],
   selector: 'app-caregiver-dashboard',
   styleUrl: './caregiver-dashboard.scss',
   templateUrl: './caregiver-dashboard.html',
@@ -40,6 +42,10 @@ export class CaregiverDashboard implements OnInit {
     return patientId === this.database.getLocalUserId()
       ? [SENIOR_HOME_ROUTE]
       : [SENIOR_HOME_ROUTE, patientId];
+  }
+
+  public avatar(userId: UserId): AvatarColor {
+    return avatarColor(userId);
   }
 
   /** Wylogowanie: wracamy na ekran logowania/rejestracji. */

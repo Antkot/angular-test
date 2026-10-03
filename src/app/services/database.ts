@@ -8,6 +8,7 @@ import {
   UserRole,
   NewUser,
   MedicalRecord,
+  MedicalRecordId,
 } from '../models/app.models';
 import { MOCK_USERS, MOCK_ACCESS, MOCK_RECORDS } from '../data/mock-db';
 
@@ -288,5 +289,16 @@ export class Database {
 
     this.saveRecords(allRecords);
     return of(true).pipe(delay(300));
+  }
+
+  // Pojedyncze badanie po id (np. do edycji)
+  getMedicalRecordById(recordId: MedicalRecordId): MedicalRecord | undefined {
+    return this.getStoredRecords().find((record) => record.id === recordId);
+  }
+
+  // 7. USUNIĘCIE badania
+  deleteMedicalRecord(recordId: MedicalRecordId): Observable<boolean> {
+    this.saveRecords(this.getStoredRecords().filter((record) => record.id !== recordId));
+    return of(true).pipe(delay(200));
   }
 }

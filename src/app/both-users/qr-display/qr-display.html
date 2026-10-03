@@ -1,24 +1,33 @@
-<app-verify-header />
+<app-top-bar title="Weryfikacja użytkownika" />
 
-<main class="verify-view">
-  <canvas
-    #qrCanvas
-    width="260"
-    height="260"
-    role="img"
-    aria-label="Kod QR profilu pacjenta"
-  ></canvas>
+<div class="page page--center">
+  <div class="qr-frame">
+    <canvas
+      #qrCanvas
+      width="224"
+      height="224"
+      role="img"
+      aria-label="Kod QR profilu pacjenta"
+    ></canvas>
+  </div>
 
-  <p class="instruction">
-    @if (patient(); as account) {
-      {{ account.firstName }} {{ account.lastName }}
-    }
-    <br />
-    Zeskanuj ten kod QR<br />
-    aplikacją opiekuna
-  </p>
+  <p class="qr-caption">Zeskanuj ten kod QR aplikacją opiekuna</p>
+
+  @if (patient(); as account) {
+    <p class="qr-account">
+      <span class="qr-account__dot" aria-hidden="true"></span>
+      Konto: <strong>{{ account.firstName }} {{ account.lastName }}</strong>
+    </p>
+  }
 
   @if (error(); as message) {
     <p class="error">{{ message }}</p>
   }
-</main>
+
+  <a class="fab fab--lg" routerLink="/qr-scanner" aria-label="Skanuj kod pacjenta">
+    <svg viewBox="0 0 24 24" aria-hidden="true">
+      <path d="M4 8h3l1.5-2h7L17 8h3a1 1 0 0 1 1 1v9a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V9a1 1 0 0 1 1-1z" />
+      <circle cx="12" cy="13" r="3.2" />
+    </svg>
+  </a>
+</div>

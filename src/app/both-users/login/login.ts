@@ -1,6 +1,6 @@
 import { Component, inject, signal } from '@angular/core';
 import { Router, RouterLink } from '@angular/router';
-import { Database } from '../../services/database';
+import { AUTH_ROUTE, Database } from '../../services/database';
 
 @Component({
   selector: 'app-login',
@@ -14,10 +14,15 @@ export class Login {
 
   readonly errorMessage = signal<string | null>(null);
 
+  /** Wysłanie formularza (Enter w polu). */
   onLogin(event: SubmitEvent): void {
     event.preventDefault();
+    this.submit(event.currentTarget as HTMLFormElement);
+  }
 
-    const formData = new FormData(event.currentTarget as HTMLFormElement);
+  /** Przycisk „Zaloguj się” u dołu ekranu - formularz z referencji szablonu. */
+  submit(form: HTMLFormElement): void {
+    const formData = new FormData(form);
     const email = String(formData.get('email') ?? '');
     const password = String(formData.get('password') ?? '');
 
@@ -36,5 +41,10 @@ export class Login {
   onGoogleLogin(): void {
     // MVP: logowanie społecznościowe nie jest obsłużone.
     this.errorMessage.set('Logowanie przez Google nie jest dostępne w wersji MVP.');
+  }
+
+  /** Powrót do wyboru konta. */
+  goBack(): void {
+    void this.router.navigateByUrl('/auth');
   }
 }

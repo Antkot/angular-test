@@ -1,5 +1,7 @@
-import { Component, OnInit, inject, signal } from '@angular/core';
+import { Component, OnInit, computed, inject, signal } from '@angular/core';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
+import { TopBar } from '../../shared/top-bar/top-bar';
+import { TagColor, tagColor } from '../../data/tag-colors';
 import { AUTH_ROUTE, CAREGIVER_HOME_ROUTE, Database } from '../../services/database';
 import { MedicalRecord, User, UserId } from '../../models/app.models';
 
@@ -11,7 +13,7 @@ import { MedicalRecord, User, UserId } from '../../models/app.models';
 @Component({
   selector: 'app-senior-dashboard',
   standalone: true,
-  imports: [RouterLink],
+  imports: [RouterLink, TopBar],
   templateUrl: './senior-dashboard.html',
   styleUrls: ['./senior-dashboard.scss'],
 })
@@ -26,9 +28,68 @@ export class SeniorDashboard implements OnInit {
   public readonly isLoading = signal(true);
   /** Opiekun ogląda cudzy profil - wtedy dashboard jest szczegółami podopiecznego. */
   public readonly isCaregiverContext = signal(false);
+  /** Fraza wyszukiwarki na liście badań. */
+  public readonly search = signal('');
+  /** Wybrany filtr tagu (null = wszystkie). */
+  public readonly tagFilter = signal<string | null>(null);
+  public readonly filterOpen = signal(false);
+
+  /** Unikalne tagi z badań - źródło filtrów pod wyszukiwarką. */
+  public readonly allTags = computed(() => [
+    ...new Set(this.records().flatMap((record) => record.tags)),
+  ]);
+
+  /** Tytuł paska: imię i nazwisko oglądanego profilu. */
+  public readonly profileTitle = computed(() => {
+    const account = this.profile();
+    if (account) {
+      return `${account.firstName} ${account.lastName}`;
+    }
+    return this.isCaregiverContext() ? 'Profil podopiecznego' : 'Panel Seniora';
+  });
+
+  /** Badania przefiltrowane wyszukiwarką i wybranym tagiem. */
+  public readonly filteredRecords = computed(() => {
+    const phrase = this.search().trim().toLocaleLowerCase();
+    const tag = this.tagFilter();
+
+    return this.records().filter((record) => {
+      const matchesTag = tag === null || record.tags.includes(tag);
+      const matchesText =
+        !phrase ||
+        [record.title, record.doctor, record.description, record.date, ...record.tags]
+          .join(' ')
+          .toLocaleLowerCase()
+          .includes(phrase);
+
+      return matchesTag && matchesText;
+    });
+  });
+
+  public tagColor(tag: string): TagColor {
+    return tagColor(tag);
+  }
+
+  /** Liczba załączników badania ("1 załącznik" / "3 załączniki"). */
+  public attachmentLabel(record: MedicalRecord): string {
+    const count = record.attachments?.length ?? (record.hasAttachments ? 1 : 0);
+    return count === 1 ? '1 załącznik' : `${count} załączników`;
+  }
 
   ngOnInit(): void {
     this.route.paramMap.subscribe((params) => this.showProfile(params.get('patientId')));
+  }
+
+  public onSearch(event: Event): void {
+    this.search.set((event.target as HTMLInputElement).value);
+  }
+
+  public toggleFilter(): void {
+    this.filterOpen.update((open) => !open);
+  }
+
+  public selectTag(tag: string | null): void {
+    this.tagFilter.set(tag);
   }
 
   /** Kod QR udostępnia własny profil - profilu podopiecznego nie udostępniamy stąd. */

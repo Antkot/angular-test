@@ -1,0 +1,67 @@
+.sheet-backdrop {
+  position: absolute;
+  inset: 0;
+  z-index: 40;
+  display: flex;
+  align-items: flex-end;
+  background: rgb(0 0 0 / 35%);
+}
+
+.sheet {
+  width: 100%;
+  padding: 16px 12px 24px;
+  border-radius: 12px 12px 0 0;
+  background: #ffffff;
+}
+
+.sheet__head {
+  display: grid;
+  grid-template-columns: 2rem 1fr 2rem;
+  align-items: center;
+  margin-bottom: 12px;
+}
+
+.sheet__title {
+  font-size: 14px;
+  font-weight: 700;
+  text-align: center;
+  letter-spacing: 0.02em;
+}
+
+.calendar__weekdays,
+.calendar__grid {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+}
+
+.calendar__weekday {
+  padding: 8px 0;
+  color: var(--md-text-light);
+  font-size: 11px;
+  text-align: center;
+}
+
+.calendar__day {
+  padding: 10px 0;
+  border: 0;
+  background: transparent;
+  color: var(--md-text);
+  font-family: inherit;
+  font-size: 13px;
+  cursor: pointer;
+}
+
+.calendar__day:hover {
+  background: var(--md-surface);
+}
+
+.calendar__day.is-muted {
+  color: var(--md-border-strong);
+}
+
+.calendar__day.is-selected {
+  border-radius: 9999px;
+  background: var(--md-brand);
+  color: #ffffff;
+  font-weight: 700;
+}

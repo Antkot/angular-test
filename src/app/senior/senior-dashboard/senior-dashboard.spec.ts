@@ -64,7 +64,7 @@ describe('SeniorDashboard', () => {
     it('offers the access code and no back button', () => {
       const link = fixture.nativeElement.querySelector('a[href="/qr-display"]') as HTMLElement;
       expect(link.textContent).toContain('Pokaż mój kod dostępu');
-      expect(fixture.nativeElement.textContent).not.toContain('Wróć do podopiecznych');
+      expect(fixture.nativeElement.querySelector('[aria-label="Wróć"]')).toBeNull();
     });
   });
 
@@ -82,7 +82,8 @@ describe('SeniorDashboard', () => {
 
     it('has a back button and hides the access code', () => {
       expect(component.canShareAccessCode).toBe(false);
-      expect(fixture.nativeElement.textContent).toContain('Wróć do podopiecznych');
+      // Strzałka powrotu siedzi w pasku na górze
+      expect(fixture.nativeElement.querySelector('[aria-label="Wróć"]')).toBeTruthy();
       expect(fixture.nativeElement.querySelector('a[href="/qr-display"]')).toBeNull();
     });
 

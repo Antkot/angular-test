@@ -1,11 +1,40 @@
-/* You can add global styles to this file, and also import other style files */
+/* MedDocs - globalny styl mobilny, wg projektu (medicard / Figma) */
+
+/* 1. TOKENY */
+:root {
+  --md-brand: #68b27a;
+  --md-brand-dark: #5aa16b;
+  --md-brand-darker: #519160;
+  --md-brand-light: #bfecc6;
+  --md-text: #1b1b1b;
+  --md-text-light: #747474;
+  --md-icon: #515151;
+  --md-bg: #ffffff;
+  --md-surface: #fafafa;
+  --md-surface-2: #f5f5f5;
+  --md-border: #e5e7eb;
+  --md-border-strong: #d4d4d4;
+  --md-danger: #b91c1c;
+  --md-radius: 6px;
+  --md-radius-sm: 2px;
+  --md-topbar-h: 52px;
+}
+
+/* 2. RESET */
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
 html,
 body {
   margin: 0;
   min-height: 100%;
-  background: #fff;
-  color: #111827;
+  background: #1e1e1e;
+  color: var(--md-text);
   font-family:
+    'Plus Jakarta Sans',
     system-ui,
     -apple-system,
     'Segoe UI',
@@ -14,4 +43,832 @@ body {
     Arial,
     sans-serif;
   -webkit-font-smoothing: antialiased;
+}
+
+body {
+  display: flex;
+  justify-content: center;
+}
+
+h1,
+h2,
+h3,
+h4,
+p,
+figure {
+  margin: 0;
+}
+
+ul {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+button {
+  font-family: inherit;
+}
+
+a {
+  color: inherit;
+  text-decoration: none;
+}
+
+code {
+  font-family: ui-monospace, 'SFMono-Regular', Menlo, monospace;
+  font-size: 12px;
+}
+
+/* 3. RAMKA APLIKACJI */
+.app-shell {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  max-width: 420px;
+  min-height: 100dvh;
+  margin: 0 auto;
+  background: #ffffff;
+}
+
+/* Na PC aplikacja działa normalnie - kolumna telefonu wyśrodkowana na tle. */
+@media (min-width: 768px) {
+  body {
+    padding: 24px 0;
+  }
+
+  .app-shell {
+    min-height: calc(100dvh - 48px);
+    border-radius: 24px;
+    box-shadow: 0 25px 60px -15px rgb(0 0 0 / 55%);
+    overflow: hidden;
+  }
+}
+
+.app-shell__body {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.page {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  overflow-y: auto;
+  padding: 16px;
+}
+
+.page--center {
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+}
+
+.page--tight {
+  padding: 24px;
+}
+
+/* 4. TOP BAR */
+.topbar {
+  display: grid;
+  grid-template-columns: 2rem 1fr 2rem;
+  align-items: center;
+  flex-shrink: 0;
+  height: var(--md-topbar-h);
+  padding: 0 12px;
+  background: #ffffff;
+  border-bottom: 1px solid var(--md-border);
+}
+
+.topbar__title {
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--md-text);
+  text-align: center;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.topbar--sm .topbar__title {
+  font-size: 14px;
+}
+
+.icon-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 2rem;
+  height: 2rem;
+  padding: 6px;
+  border: 0;
+  border-radius: 999px;
+  background: transparent;
+  color: var(--md-text);
+  cursor: pointer;
+  transition: background-color 0.15s;
+}
+
+.icon-button:hover {
+  background: var(--md-surface-2);
+}
+
+.icon-button svg {
+  width: 20px;
+  height: 20px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.icon-button--sm svg {
+  stroke-width: 1.8;
+}
+
+/* 5. PRZYCISKI */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  padding: 12px 24px;
+  border: 1px solid transparent;
+  border-radius: var(--md-radius-sm);
+  background: var(--md-brand);
+  color: #ffffff;
+  font-size: 14px;
+  font-weight: 500;
+  text-decoration: none;
+  cursor: pointer;
+  transition:
+    background-color 0.15s,
+    transform 0.1s;
+}
+
+.btn:hover {
+  background: var(--md-brand-dark);
+}
+
+.btn:active {
+  background: var(--md-brand-darker);
+  transform: scale(0.99);
+}
+
+.btn--pill {
+  border-radius: 9999px;
+  font-size: 16px;
+  padding: 14px 24px;
+}
+
+.btn--ghost {
+  background: #ffffff;
+  border-color: var(--md-border);
+  color: var(--md-text);
+}
+
+.btn--ghost:hover {
+  background: var(--md-surface);
+  border-color: var(--md-border-strong);
+}
+
+.btn--block {
+  width: 100%;
+}
+
+.btn--sm {
+  padding: 8px 14px;
+  font-size: 13px;
+}
+
+.btn-row {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+/* 6. FAB */
+.fab {
+  position: absolute;
+  right: 20px;
+  bottom: 24px;
+  z-index: 20;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 56px;
+  height: 56px;
+  border: 0;
+  border-radius: 999px;
+  background: var(--md-brand);
+  color: #ffffff;
+  cursor: pointer;
+  box-shadow: 0 10px 15px -3px rgb(0 0 0 / 10%);
+  transition:
+    background-color 0.15s,
+    transform 0.1s;
+}
+
+.fab:hover {
+  background: var(--md-brand-dark);
+}
+
+.fab:active {
+  background: var(--md-brand-darker);
+  transform: scale(0.95);
+}
+
+.fab svg {
+  width: 32px;
+  height: 32px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.fab--lg {
+  width: 72px;
+  height: 72px;
+}
+
+.fab--lg svg {
+  width: 32px;
+  height: 32px;
+  stroke-width: 1.8;
+}
+
+/* 7. WYSZUKIWARKA */
+.search {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 12px;
+  border: 1px solid var(--md-border-strong);
+  border-radius: 9999px;
+  background: #ffffff;
+}
+
+.search:focus-within {
+  border-color: var(--md-icon);
+}
+
+.search__icon-btn {
+  display: inline-flex;
+  padding: 4px;
+  border: 0;
+  border-radius: 4px;
+  background: transparent;
+  color: var(--md-text-light);
+  cursor: pointer;
+}
+
+.search__icon-btn:hover {
+  color: var(--md-text);
+}
+
+.search__icon-btn.is-active {
+  color: var(--md-brand);
+}
+
+.search__icon-btn svg,
+.search__icon {
+  width: 16px;
+  height: 16px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.8;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.search__input {
+  flex: 1;
+  min-width: 0;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: var(--md-text);
+  font-size: 14px;
+}
+
+.search__input:focus {
+  outline: none;
+}
+
+.search__input::placeholder {
+  color: var(--md-border-strong);
+}
+
+/* Filtry tagów pod wyszukiwarką */
+.tag-filter {
+  display: flex;
+  gap: 6px;
+  overflow-x: auto;
+  padding: 8px 0;
+  scrollbar-width: none;
+}
+
+.tag-filter::-webkit-scrollbar {
+  display: none;
+}
+
+.tag-filter .badge {
+  flex-shrink: 0;
+}
+
+/* 8. KARTY / LISTY */
+.card {
+  padding: 14px;
+  border: 1px solid var(--md-border);
+  border-radius: var(--md-radius);
+  background: #ffffff;
+  transition:
+    border-color 0.15s,
+    box-shadow 0.15s;
+}
+
+.card--tap {
+  cursor: pointer;
+  text-align: left;
+  width: 100%;
+}
+
+.card--tap:hover {
+  border-color: var(--md-border-strong);
+  box-shadow: 0 1px 2px rgb(0 0 0 / 5%);
+}
+
+.card__head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.card__title {
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--md-text);
+  line-height: 1.35;
+}
+
+.card__date {
+  display: block;
+  margin-top: 2px;
+  color: var(--md-border-strong);
+  font-size: 12px;
+}
+
+.card__text {
+  margin-top: 8px;
+  color: var(--md-text);
+  font-size: 12px;
+  line-height: 1.6;
+}
+
+.card__note {
+  margin-top: 4px;
+  color: var(--md-icon);
+  font-size: 12px;
+}
+
+.card__files {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-top: 10px;
+  padding-top: 8px;
+  border-top: 1px solid var(--md-surface-2);
+  color: var(--md-border-strong);
+  font-size: 11px;
+}
+
+.card__files::before {
+  content: '';
+  width: 6px;
+  height: 6px;
+  border-radius: 9999px;
+  background: #10b981;
+}
+
+.stack {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+/* Wiersze listy (ustawienia) */
+.rows {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  overflow-y: auto;
+}
+
+.row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  padding: 16px 20px;
+  border: 0;
+  border-bottom: 1px solid var(--md-border);
+  background: #ffffff;
+  color: var(--md-text);
+  font-size: 14px;
+  text-align: left;
+  cursor: pointer;
+  transition: background-color 0.15s;
+}
+
+.row:hover {
+  background: var(--md-surface);
+}
+
+.row__chevron {
+  color: var(--md-border-strong);
+  font-size: 18px;
+  line-height: 1;
+}
+
+/* Kafelki wyboru (weryfikacja) */
+.choice-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 14px;
+  padding-top: 48px;
+}
+
+.choice {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: space-between;
+  aspect-ratio: 1;
+  padding: 14px;
+  border: 1px solid var(--md-border);
+  border-radius: var(--md-radius-sm);
+  background: #ffffff;
+  color: var(--md-text);
+  font-size: 11px;
+  line-height: 1.35;
+  text-align: center;
+  cursor: pointer;
+  transition:
+    border-color 0.15s,
+    box-shadow 0.15s,
+    transform 0.1s;
+}
+
+.choice:hover {
+  border-color: var(--md-border-strong);
+  box-shadow: 0 1px 2px rgb(0 0 0 / 5%);
+}
+
+.choice:active {
+  transform: scale(0.98);
+}
+
+.choice svg {
+  width: 96px;
+  height: 64px;
+  max-width: 100%;
+  color: var(--md-icon);
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.6;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+/* Kafelki konta */
+.account-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 16px;
+}
+
+.account-tile {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  aspect-ratio: 1;
+  padding: 16px;
+  border: 1px solid var(--md-border);
+  border-radius: var(--md-radius-sm);
+  background: #ffffff;
+  color: var(--md-text);
+  font-size: 14px;
+  cursor: pointer;
+  transition:
+    border-color 0.15s,
+    box-shadow 0.15s,
+    transform 0.1s;
+}
+
+.account-tile:hover {
+  border-color: var(--md-border-strong);
+  box-shadow: 0 1px 2px rgb(0 0 0 / 5%);
+}
+
+.account-tile:active {
+  transform: scale(0.98);
+}
+
+.account-tile__avatar {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 64px;
+  height: 64px;
+  margin-bottom: 12px;
+  border: 1px solid;
+  border-radius: 9999px;
+  font-size: 18px;
+  font-weight: 500;
+  transition: transform 0.15s;
+}
+
+.account-tile:hover .account-tile__avatar {
+  transform: scale(1.05);
+}
+
+.account-tile__avatar--dashed {
+  border: 2px dashed var(--md-border-strong);
+  color: var(--md-text);
+  font-size: 24px;
+}
+
+.account-tile__name {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.account-tile__sub {
+  margin-top: 4px;
+  color: var(--md-text-light);
+  font-size: 12px;
+}
+
+/* Avatar w wierszu profilu */
+.avatar {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  width: 40px;
+  height: 40px;
+  border: 1px solid;
+  border-radius: 9999px;
+  font-size: 14px;
+  font-weight: 500;
+}
+
+.avatar--sm {
+  width: 32px;
+  height: 32px;
+  font-size: 12px;
+}
+
+.avatar-lg {
+  width: 48px;
+  height: 48px;
+}
+
+/* 9. PIGUŁKI TAGÓW */
+.badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  flex-shrink: 0;
+  padding: 2px 10px;
+  border: 0;
+  border-radius: 9999px;
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  white-space: nowrap;
+}
+
+.badge--filter {
+  border: 0;
+  cursor: pointer;
+  font-family: inherit;
+}
+
+.badge--filter:hover {
+  opacity: 1;
+}
+
+.badges {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-wrap: wrap;
+  flex-shrink: 0;
+}
+
+.badge__remove {
+  display: inline-flex;
+  border: 0;
+  padding: 0;
+  background: transparent;
+  color: inherit;
+  font-size: 14px;
+  line-height: 1;
+  cursor: pointer;
+}
+
+.badge--add {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+  padding: 0;
+  border: 2px dashed var(--md-border-strong);
+  border-radius: 9999px;
+  background: transparent;
+  color: var(--md-icon);
+  font-size: 14px;
+  cursor: pointer;
+}
+
+/* 10. FORMULARZE */
+.field {
+  display: block;
+}
+
+.field + .field {
+  margin-top: 16px;
+}
+
+.field__label {
+  display: block;
+  margin-bottom: 6px;
+  color: var(--md-text-light);
+  font-size: 12px;
+}
+
+.input,
+.textarea {
+  width: 100%;
+  padding: 10px 12px;
+  border: 1px solid var(--md-border);
+  border-radius: var(--md-radius-sm);
+  background: #ffffff;
+  color: var(--md-text);
+  font-family: inherit;
+  font-size: 14px;
+  transition: border-color 0.15s;
+}
+
+.input::placeholder,
+.textarea::placeholder {
+  color: var(--md-border-strong);
+}
+
+.input:focus,
+.textarea:focus {
+  outline: none;
+  border-color: var(--md-icon);
+}
+
+.textarea {
+  min-height: 96px;
+  resize: vertical;
+  line-height: 1.6;
+}
+
+.field--icon {
+  position: relative;
+}
+
+.field--icon .input {
+  padding-right: 40px;
+}
+
+.field__icon {
+  position: absolute;
+  top: 50%;
+  right: 12px;
+  width: 16px;
+  height: 16px;
+  transform: translateY(-50%);
+  fill: none;
+  stroke: var(--md-border-strong);
+  stroke-width: 1.7;
+  stroke-linecap: round;
+  pointer-events: none;
+}
+
+/* Separator "lub" */
+.divider {
+  position: relative;
+  display: flex;
+  justify-content: center;
+  margin: 20px 0 12px;
+  border-top: 1px solid var(--md-border);
+}
+
+.divider span {
+  position: absolute;
+  top: 50%;
+  padding: 0 12px;
+  background: #ffffff;
+  color: var(--md-text-light);
+  font-size: 12px;
+  transform: translateY(-50%);
+}
+
+/* 11. MODAL */
+.modal-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 30;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  background: rgb(0 0 0 / 45%);
+}
+
+.modal {
+  width: 100%;
+  max-width: 360px;
+  padding: 20px;
+  border-radius: 12px;
+  background: #ffffff;
+}
+
+.modal__title {
+  margin-bottom: 12px;
+  font-size: 18px;
+  font-weight: 700;
+}
+
+.modal__close {
+  width: 100%;
+  margin-top: 16px;
+  padding: 10px;
+  border: 1px solid var(--md-border);
+  border-radius: var(--md-radius-sm);
+  background: var(--md-surface);
+  color: var(--md-text-light);
+  font-size: 13px;
+  cursor: pointer;
+}
+
+/* 12. POMOCNICZE */
+.section-title {
+  margin: 20px 0 8px;
+  color: var(--md-text-light);
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.page-title {
+  margin: 8px 0 32px;
+  font-size: 20px;
+  font-weight: 700;
+  text-align: center;
+}
+
+.hint {
+  color: var(--md-text-light);
+  font-size: 12px;
+  line-height: 1.6;
+}
+
+.error {
+  margin-top: 8px;
+  color: var(--md-danger);
+  font-size: 12px;
+}
+
+.empty {
+  padding: 48px 12px;
+  color: var(--md-text-light);
+  font-size: 14px;
+  text-align: center;
+}
+
+.empty__icon {
+  width: 48px;
+  height: 48px;
+  margin: 0 auto 8px;
+  fill: none;
+  stroke: var(--md-border-strong);
+  stroke-width: 1;
+}
+
+.spacer-bottom {
+  height: 80px;
 }

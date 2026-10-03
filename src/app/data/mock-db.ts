@@ -1,6 +1,15 @@
 // src/app/data/mock-db.ts
 import { User, UserAccess, MedicalRecord } from '../models/app.models';
 
+// 0. Tagi dostępne w edytorze badania (kolory dobierane po nazwie)
+export const KNOWN_TAGS: string[] = [
+  'Tag xd',
+  'Tag 2',
+  'Pilne',
+  'Kardiolog',
+  'RTG',
+];
+
 // 1. Użytkownicy w systemie
 export const MOCK_USERS: User[] = [
   {

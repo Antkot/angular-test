@@ -1,0 +1,43 @@
+<app-top-bar title="Ustawienia" [showSettings]="false" />
+
+<div class="rows">
+  <button type="button" class="row">
+    <span>Ogólne</span>
+    <span class="row__chevron" aria-hidden="true">›</span>
+  </button>
+
+  <a class="row" routerLink="/verify">
+    <span>Weryfikacja użytkownika</span>
+    <span class="row__chevron" aria-hidden="true">›</span>
+  </a>
+
+  <button type="button" class="row">
+    <span>Informacje prawne</span>
+    <span class="row__chevron" aria-hidden="true">›</span>
+  </button>
+</div>
+
+<!-- KONTO I WYLOGOWANIE -->
+<div class="card" style="margin: 16px; border: 0; background: var(--md-surface)">
+  @if (profile(); as account) {
+    <div class="settings-account">
+      <span
+        class="avatar avatar-lg"
+        [style.background]="avatar(account.id).bg"
+        [style.border-color]="avatar(account.id).border"
+        [style.color]="avatar(account.id).text"
+        aria-hidden="true"
+      >
+        {{ account.initials }}
+      </span>
+      <span class="settings-account__data">
+        <span class="card__title">{{ account.firstName }} {{ account.lastName }}</span>
+        <span class="hint">{{ account.email }}</span>
+      </span>
+    </div>
+  }
+
+  <button type="button" class="btn btn--ghost btn--block btn--sm" (click)="signOut()">
+    Wyloguj lub zmień konto
+  </button>
+</div>

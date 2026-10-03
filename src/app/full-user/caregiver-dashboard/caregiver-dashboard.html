@@ -1,54 +1,60 @@
-<div class="caregiver-dashboard">
-  <header class="caregiver-dashboard__header">
-    <h2>Panel Opiekuna</h2>
+<app-top-bar title="Panel Opiekuna" [showBack]="false" />
 
-    <div class="caregiver-dashboard__actions">
-      <!-- Każdy skan dodaje kolejnego podopiecznego -->
-      <a class="action-button" routerLink="/qr-scanner">Dodaj podopiecznego przez QR</a>
-      <button type="button" class="action-button action-button--ghost" (click)="signOut()">
-        Zmień konto
-      </button>
-    </div>
-  </header>
+<div class="page">
+  <a class="btn btn--block" routerLink="/qr-scanner">Dodaj podopiecznego przez QR</a>
+
+  <h2 class="section-title">Profile ({{ roster().length }})</h2>
 
   @if (isLoading()) {
     <p class="hint">Ładowanie profili...</p>
   } @else {
-    <section class="section">
-      <h3 class="section__title">
-        Profile
-        <span class="section__accent">{{ roster().length }}</span>
-      </h3>
-
-      <div class="patient-picker">
-        @for (entry of roster(); track entry.user.id) {
-          <a
-            class="patient-tile"
-            [routerLink]="profileLink(entry.user.id)"
-            [attr.aria-label]="
-              'Otwórz profil: ' + entry.user.firstName + ' ' + entry.user.lastName
-            "
-          >
-            <span class="patient-tile__avatar" aria-hidden="true">{{ entry.user.initials }}</span>
-
-            <span>
-              <span class="patient-tile__name">
-                {{ entry.user.firstName }} {{ entry.user.lastName }}
+    <div class="stack">
+      @for (entry of roster(); track entry.user.id) {
+        <a
+          class="card card--tap"
+          [routerLink]="profileLink(entry.user.id)"
+          [attr.aria-label]="
+            'Otwórz profil: ' + entry.user.firstName + ' ' + entry.user.lastName
+          "
+        >
+          <div class="card__head">
+            <div class="roster-card__who">
+              <span class="avatar" [style.background]="avatar(entry.user.id).bg"
+                [style.border-color]="avatar(entry.user.id).border"
+                [style.color]="avatar(entry.user.id).text" aria-hidden="true">
+                {{ entry.user.initials }}
               </span>
-              <span class="patient-tile__badge">
-                {{ entry.isSelf ? 'Twoje konto' : 'Podopieczny' }}
+              <span>
+                <span class="card__title">
+                  {{ entry.user.firstName }} {{ entry.user.lastName }}
+                </span>
+                <span class="card__date">{{ entry.user.email }}</span>
               </span>
+            </div>
+
+            <span
+              class="badge"
+              [style.background]="entry.isSelf ? '#bfecc6' : '#e5e7eb'"
+              [style.color]="entry.isSelf ? '#1e4620' : '#515151'"
+            >
+              {{ entry.isSelf ? 'Twoje konto' : 'Podopieczny' }}
             </span>
-          </a>
-        }
-      </div>
-
-      @if (roster().length <= 1) {
-        <p class="hint">
-          Nie masz jeszcze podopiecznych. Zeskanuj kod QR pacjenta, aby dodać jego profil -
-          możesz powtarzać to dla kolejnych osób.
-        </p>
+          </div>
+        </a>
       }
-    </section>
+    </div>
+
+    @if (roster().length <= 1) {
+      <p class="hint" style="margin-top: 12px">
+        Nie masz jeszcze podopiecznych. Zeskanuj kod QR pacjenta, aby dodać jego profil -
+        możesz powtarzać to dla kolejnych osób.
+      </p>
+    }
   }
+
+  <div class="spacer-bottom"></div>
+
+  <button type="button" class="btn btn--ghost btn--block" (click)="signOut()">
+    Zmień konto
+  </button>
 </div>

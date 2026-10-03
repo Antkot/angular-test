@@ -1,0 +1,24 @@
+.topbar__slot {
+  display: flex;
+  align-items: center;
+}
+
+.topbar__slot--end {
+  justify-content: flex-end;
+}
+
+.topbar-action {
+  padding: 6px 12px;
+  border: 0;
+  border-radius: 4px;
+  background: var(--md-brand);
+  color: #ffffff;
+  font-family: inherit;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.topbar-action:hover {
+  background: var(--md-brand-dark);
+}

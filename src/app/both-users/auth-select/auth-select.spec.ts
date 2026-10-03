@@ -96,7 +96,7 @@ describe('AuthSelect', () => {
     component.openAddModal();
     component.chooseRole('senior');
     fixture.detectChanges();
-    (fixture.nativeElement.querySelector('.account-modal__close') as HTMLButtonElement).click();
+    (fixture.nativeElement.querySelector('.modal__close') as HTMLButtonElement).click();
     fixture.detectChanges();
 
     expect(component.isAddModalOpen()).toBe(false);

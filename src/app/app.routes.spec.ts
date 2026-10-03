@@ -46,7 +46,7 @@ describe('app.routes', () => {
     await harness.navigateByUrl('/senior-dashboard');
 
     expect(router.url).toBe('/senior-dashboard');
-    expect(harness.routeNativeElement?.textContent).toContain('Panel Seniora');
+    expect(harness.routeNativeElement?.textContent).toContain('Jan Kowalski');
     // Senior ma przycisk otwierający ekran kodu QR
     const link = harness.routeNativeElement?.querySelector('a[href="/qr-display"]');
     expect(link?.textContent).toContain('Pokaż mój kod dostępu');

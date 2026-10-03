@@ -1,82 +1,147 @@
-<div class="senior-dashboard">
-  <header class="senior-dashboard__header">
-    <div>
-      <h2>{{ isCaregiverContext() ? 'Profil podopiecznego' : 'Panel Seniora' }}</h2>
-      @if (profile(); as account) {
-        <p class="hint">{{ account.firstName }} {{ account.lastName }}</p>
-      }
-    </div>
+<app-top-bar [title]="profileTitle()" [showBack]="isCaregiverContext()" [showSettings]="!isCaregiverContext()" />
 
-    <div class="senior-dashboard__actions">
-      @if (isCaregiverContext()) {
-        <!-- Kontekst opiekuna: powrót do listy profili -->
-        <button type="button" class="action-button action-button--ghost" (click)="goBack()">
-          Wróć do podopiecznych
-        </button>
-      } @else {
-        <!-- Kontekst seniora: udostępnienie własnego profilu kodem QR -->
-        <a class="action-button" routerLink="/qr-display">Pokaż mój kod dostępu</a>
-      }
+<div class="page">
+  <!-- DANE KONTA: senior udostępnia profil, opiekun widzi podopiecznego -->
+  @if (profile(); as account) {
+    <section class="card">
+      <div class="card__head">
+        <div>
+          <span class="card__title">
+            {{ isCaregiverContext() ? 'Dane podopiecznego' : 'Mój profil' }}
+          </span>
+          <span class="card__date">{{ account.email }}</span>
+        </div>
+        <span class="badge" style="background: #bfecc6; color: #1e4620">
+          {{ account.role === 'caregiver' ? 'Opiekun' : 'Senior' }}
+        </span>
+      </div>
 
-      <button type="button" class="action-button action-button--ghost" (click)="signOut()">
-        Zmień konto
-      </button>
-    </div>
-  </header>
-
-  <!-- DANE PROFILU -->
-  <section class="section">
-    <h3 class="section__title">Dane profilu</h3>
-
-    @if (profile(); as account) {
-      <p>Imię i nazwisko: {{ account.firstName }} {{ account.lastName }}</p>
-      <p>Rola: {{ account.role === 'caregiver' ? 'Opiekun' : 'Senior (pacjent)' }}</p>
-      <p>E-mail: {{ account.email }}</p>
-      <p>Identyfikator profilu: <code>{{ account.id }}</code></p>
+      <p class="card__text">Identyfikator profilu: <code>{{ account.id }}</code></p>
 
       @if (canShareAccessCode) {
-        <p class="hint">Ten identyfikator jest zakodowany w kodzie QR dla opiekuna.</p>
+        <a class="btn btn--block" style="margin-top: 12px" routerLink="/qr-display">
+          Pokaż mój kod dostępu
+        </a>
       }
-    } @else {
-      <p class="hint">Nie znaleziono profilu zalogowanego konta.</p>
-    }
-  </section>
+    </section>
+  }
 
-  <!-- HISTORIA BADAŃ -->
-  <section class="section">
-    <h3 class="section__title">Historia badań</h3>
+  <!-- WYSZUKIWARKA + FILTR TAGÓW -->
+  <div class="search" style="margin-top: 12px">
+    <button
+      type="button"
+      class="search__icon-btn"
+      [class.is-active]="tagFilter() !== null"
+      (click)="toggleFilter()"
+      aria-label="Filtruj tagi"
+      title="Filtruj tagi"
+    >
+      <svg viewBox="0 0 24 24" aria-hidden="true">
+        <path d="M4 7h16M7 12h10M10 17h4" />
+      </svg>
+    </button>
 
+    <input
+      class="search__input"
+      type="text"
+      placeholder="Wyszukaj wizytę"
+      aria-label="Wyszukaj wizytę"
+      [value]="search()"
+      (input)="onSearch($event)"
+    />
+
+    <svg class="search__icon" viewBox="0 0 24 24" aria-hidden="true">
+      <circle cx="11" cy="11" r="6.5" />
+      <path d="M16 16l4.5 4.5" />
+    </svg>
+  </div>
+
+  @if (filterOpen()) {
+    <div class="tag-filter">
+      <button
+        type="button"
+        class="badge badge--filter"
+        [style.background]="tagFilter() === null ? '#1b1b1b' : '#f5f5f5'"
+        [style.color]="tagFilter() === null ? '#ffffff' : '#515151'"
+        (click)="selectTag(null)"
+      >
+        Wszystkie ({{ records().length }})
+      </button>
+      @for (tag of allTags(); track tag) {
+        <button
+          type="button"
+          class="badge badge--filter"
+          [style.background]="tagColor(tag).bg"
+          [style.color]="tagColor(tag).text"
+          (click)="selectTag(tag)"
+        >
+          {{ tag }}
+        </button>
+      }
+    </div>
+  }
+
+  <!-- LISTA BADAŃ -->
+  <div class="stack" style="margin-top: 8px">
     @if (isLoading()) {
       <p class="hint">Ładowanie badań...</p>
     } @else {
-      <div class="records-list">
-        @for (record of records(); track record.id) {
-          <article class="record-card">
-            <h3 class="record-card__title">{{ record.title }}</h3>
-
-            <div class="record-card__meta">
-              <span>📅 {{ record.date }}</span>
-              <span>👨‍⚕️ {{ record.doctor }}</span>
-            </div>
-
-            <p class="record-card__description">{{ record.description }}</p>
-
-            @if (record.notes) {
-              <p class="record-card__description">{{ record.notes }}</p>
-            }
+      @for (record of filteredRecords(); track record.id) {
+        <a class="card card--tap" [routerLink]="['/record-detail', record.id]">
+          <div class="card__head">
+            <h2 class="card__title">{{ record.title }}</h2>
 
             @if (record.tags.length > 0) {
-              <div class="record-card__tags">
+              <div class="badges">
                 @for (tag of record.tags; track tag) {
-                  <span class="tag">{{ tag }}</span>
+                  <span
+                    class="badge"
+                    [style.background]="tagColor(tag).bg"
+                    [style.color]="tagColor(tag).text"
+                  >
+                    {{ tag }}
+                  </span>
                 }
               </div>
             }
-          </article>
-        } @empty {
-          <p class="hint">Brak historii medycznej.</p>
-        }
-      </div>
+          </div>
+
+          <span class="card__date">{{ record.date }}</span>
+
+          @if (record.description) {
+            <p class="card__text">{{ record.description }}</p>
+          }
+          @if (record.notes) {
+            <p class="card__note">{{ record.notes }}</p>
+          }
+          @if (record.hasAttachments) {
+            <div class="card__files">{{ attachmentLabel(record) }}</div>
+          }
+        </a>
+      } @empty {
+        <div class="empty">
+          <svg class="empty__icon" viewBox="0 0 24 24" aria-hidden="true">
+            <path d="M7 3h7l5 5v13a1 1 0 0 1-1 1H7a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1z" />
+            <path d="M14 3v5h5M9 12h6M9 16h6" />
+          </svg>
+          <p>Brak badań</p>
+          @if (search() || tagFilter()) {
+            <p class="hint">Brak wyników dla podanych filtrów.</p>
+          } @else {
+            <p class="hint">Dodaj pierwsze badanie za pomocą zielonego przycisku poniżej.</p>
+          }
+        </div>
+      }
     }
-  </section>
+
+    <div class="spacer-bottom"></div>
+  </div>
+
+  @if (!isCaregiverContext()) {
+    <a class="fab" routerLink="/record-form" aria-label="Dodaj badanie" title="Dodaj badanie">
+      <svg viewBox="0 0 24 24" aria-hidden="true">
+        <path d="M12 5v14M5 12h14" />
+      </svg>
+    </a>
+  }
 </div>

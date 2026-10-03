@@ -45,6 +45,7 @@ export interface MedicalRecord {
   tags: string[]; // Lista tagów, np. ['Kardiologia', 'Kontrola']
   notes: string; // Notatki tekstowe
   hasAttachments: boolean; // Czy dodano plik/zdjęcie
+  attachments?: string[]; // Nazwy dodanych plików
 }
 
 /** Rekord tworzony po zeskanowaniu kodu QR - uprawnienie do profilu pacjenta. */

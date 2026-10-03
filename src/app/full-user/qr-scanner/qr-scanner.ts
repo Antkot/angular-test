@@ -7,10 +7,10 @@ import {
   signal,
   viewChild,
 } from '@angular/core';
-import { Router } from '@angular/router';
+import { Router, RouterLink } from '@angular/router';
 import { firstValueFrom } from 'rxjs';
 import { Html5Qrcode } from 'html5-qrcode';
-import { VerifyHeader } from '../../shared/verify-header/verify-header';
+import { TopBar } from '../../shared/top-bar/top-bar';
 import { Database } from '../../services/database';
 
 /** Largest scan area in px - matches `.scan-frame` in the stylesheet. */
@@ -24,7 +24,7 @@ function extractPatientId(decodedText: string): string | null {
 
 @Component({
   selector: 'app-qr-scanner',
-  imports: [VerifyHeader],
+  imports: [TopBar, RouterLink],
   styleUrl: './qr-scanner.scss',
   templateUrl: './qr-scanner.html',
 })

@@ -1,14 +1,16 @@
-// auth-select.ts - ekran logowania/rejestracji: wybór konta albo nowe konto + rola.
+// auth-select.ts - ekran rejestracji/wyboru konta: nowe konto + rola.
 import { Component, OnInit, inject, signal } from '@angular/core';
 import { Router } from '@angular/router';
+import { AvatarColor, avatarColor } from '../../data/tag-colors';
 import { Database } from '../../services/database';
-import { User, UserRole } from '../../models/app.models';
+import { User, UserId, UserRole } from '../../models/app.models';
 
 @Component({
   selector: 'app-auth-select',
   standalone: true,
   imports: [],
   templateUrl: './auth-select.html',
+  styleUrl: './auth-select.scss',
 })
 export class AuthSelect implements OnInit {
   private readonly database = inject(Database);
@@ -37,6 +39,10 @@ export class AuthSelect implements OnInit {
   signIn(account: User): void {
     this.database.setLocalUserId(account.id);
     void this.router.navigateByUrl(this.database.getHomeRoute(account.role));
+  }
+
+  public avatar(userId: UserId): AvatarColor {
+    return avatarColor(userId);
   }
 
   openAddModal(): void {

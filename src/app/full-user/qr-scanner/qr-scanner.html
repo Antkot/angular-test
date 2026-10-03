@@ -1,6 +1,7 @@
-<app-verify-header />
+<app-top-bar title="Weryfikacja użytkownika" />
 
-<main class="verify-view">
+<div class="page page--tight">
+  <!-- PODGLĄD KAMERY -->
   <div class="scanner-window" [class.is-error]="status() === 'error'">
     <div id="qr-reader" #qrReader class="scanner-viewport"></div>
 
@@ -20,12 +21,22 @@
     }
   </div>
 
-  <p class="instruction">
-    @if (caregiver(); as account) {
-      Skanujesz jako: {{ account.firstName }} {{ account.lastName }}<br />
-    }
+  <p class="scanner-caption">
     Zeskanuj aparatem kod QR<br />
     w aplikacji osoby<br />
     udostępniającej dane
   </p>
-</main>
+
+  @if (caregiver(); as account) {
+    <p class="scanner-account">Skanujesz jako: {{ account.firstName }} {{ account.lastName }}</p>
+  }
+
+  <div class="spacer-bottom"></div>
+
+  <a class="fab fab--lg" routerLink="/qr-display" aria-label="Pokaż mój kod dostępu">
+    <svg viewBox="0 0 24 24" aria-hidden="true">
+      <path d="M4 8h3l1.5-2h7L17 8h3a1 1 0 0 1 1 1v9a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V9a1 1 0 0 1 1-1z" />
+      <circle cx="12" cy="13" r="3.2" />
+    </svg>
+  </a>
+</div>

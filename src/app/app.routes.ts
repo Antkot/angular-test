@@ -2,11 +2,12 @@ import { inject } from '@angular/core';
 import { CanActivateFn, Router, Routes } from '@angular/router';
 import { Login } from './both-users/login/login';
 import { AuthSelect } from './both-users/auth-select/auth-select';
-import { RecordForm } from './both-users/record-form/record-form';
 import { RecordDetail } from './both-users/record-detail/record-detail';
 import { QrDisplay } from './both-users/qr-display/qr-display';
+import { VerifyUser } from './both-users/verify/verify-user';
 import { SeniorDashboard } from './senior/senior-dashboard/senior-dashboard';
 import { CaregiverDashboard } from './full-user/caregiver-dashboard/caregiver-dashboard';
+import { Settings } from './settings/settings';
 import { DataView } from './data/data-view';
 import { AUTH_ROUTE, Database } from './services/database';
 
@@ -34,8 +35,14 @@ export const routes: Routes = [
   { path: 'senior-dashboard/:patientId', component: SeniorDashboard, canActivate: [sessionGuard] },
   { path: 'senior-dashboard', component: SeniorDashboard, canActivate: [sessionGuard] },
 
-  // Ekran kodu QR udostępnianego opiekunowi.
+  // Weryfikacja: wybór "skanuj / pokaż kod" (z Ustawień), potem właściwe ekrany.
+  { path: 'verify', component: VerifyUser, canActivate: [sessionGuard] },
+
+// Ekran kodu QR udostępnianego opiekunowi.
   { path: 'qr-display', component: QrDisplay, canActivate: [sessionGuard] },
+
+  // Ustawienia (ikona zębatki w pasku).
+  { path: 'settings', component: Settings, canActivate: [sessionGuard] },
 
   // Lazy loaded: the camera library (html5-qrcode) is only needed on this route.
   {
@@ -48,8 +55,9 @@ export const routes: Routes = [
   { path: 'caregiver-dashboard', component: CaregiverDashboard, canActivate: [sessionGuard] },
 
   // Widoki deweloperskie - poza przepływem, więc bez strażnika sesji.
-  { path: 'record-form', component: RecordForm },
-  { path: 'record-detail', component: RecordDetail },
+  { path: 'record-form', component: RecordDetail, canActivate: [sessionGuard] },
+  { path: 'record-detail/:recordId', component: RecordDetail, canActivate: [sessionGuard] },
+  { path: 'record-detail', component: RecordDetail, canActivate: [sessionGuard] },
   { path: 'data', component: DataView },
 
   { path: '**', redirectTo: AUTH_ROUTE.slice(1) },

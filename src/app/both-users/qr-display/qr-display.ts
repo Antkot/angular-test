@@ -1,12 +1,12 @@
 import { Component, ElementRef, afterNextRender, inject, signal, viewChild } from '@angular/core';
 import { toCanvas } from 'qrcode';
-import { VerifyHeader } from '../../shared/verify-header/verify-header';
+import { TopBar } from '../../shared/top-bar/top-bar';
 import { Database } from '../../services/database';
 import { User } from '../../models/app.models';
 
 @Component({
   selector: 'app-qr-display',
-  imports: [VerifyHeader],
+  imports: [TopBar],
   styleUrl: './qr-display.scss',
   templateUrl: './qr-display.html',
 })
@@ -27,9 +27,9 @@ export class QrDisplay {
   private async renderQrCode(): Promise<void> {
     try {
       await toCanvas(this.canvas().nativeElement, this.patientId, {
-        width: 260,
-        margin: 2,
-        color: { dark: '#111827', light: '#ffffff' },
+        width: 224,
+        margin: 1,
+        color: { dark: '#000000', light: '#ffffff' },
       });
     } catch {
       this.error.set('Nie udało się wygenerować kodu QR.');

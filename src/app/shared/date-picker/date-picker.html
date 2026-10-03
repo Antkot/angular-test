@@ -1,0 +1,47 @@
+<div class="sheet-backdrop" role="presentation" (click)="closed.emit()">
+  <section
+    class="sheet"
+    role="dialog"
+    aria-modal="true"
+    aria-label="Wybierz datę badania"
+    (click)="$event.stopPropagation()"
+  >
+    <header class="sheet__head">
+      <button type="button" class="icon-button" (click)="shiftMonth(-1)" aria-label="Poprzedni miesiąc">
+        <svg viewBox="0 0 24 24" aria-hidden="true">
+          <path d="M15 5l-7 7 7 7" />
+        </svg>
+      </button>
+
+      <span class="sheet__title">{{ monthLabel() }}</span>
+
+      <button type="button" class="icon-button" (click)="shiftMonth(1)" aria-label="Następny miesiąc">
+        <svg viewBox="0 0 24 24" aria-hidden="true">
+          <path d="M9 5l7 7-7 7" />
+        </svg>
+      </button>
+    </header>
+
+    <div class="calendar">
+      <div class="calendar__weekdays">
+        @for (dayName of weekDays; track dayName) {
+          <span class="calendar__weekday">{{ dayName }}</span>
+        }
+      </div>
+
+      <div class="calendar__grid">
+        @for (day of days(); track $index) {
+          <button
+            type="button"
+            class="calendar__day"
+            [class.is-muted]="day.muted"
+            [class.is-selected]="isSelected(day)"
+            (click)="selectDay(day)"
+          >
+            {{ day.day }}
+          </button>
+        }
+      </div>
+    </div>
+  </section>
+</div>

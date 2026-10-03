@@ -1,28 +1,15 @@
 :host {
   display: flex;
   flex-direction: column;
-  min-height: 100dvh;
-  background: #fff;
-}
-
-.verify-view {
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  gap: 24px;
-  padding: 24px 20px 40px;
-  text-align: center;
 }
 
 .scanner-window {
   position: relative;
-  width: min(100%, 340px);
+  width: 100%;
   aspect-ratio: 1;
-  border-radius: 16px;
+  border-radius: 12px;
   overflow: hidden;
-  background: #000;
+  background: #000000;
 }
 
 .scanner-window.is-error {
@@ -30,7 +17,7 @@
   align-items: center;
   justify-content: center;
   padding: 24px;
-  background: #f9fafb;
+  background: var(--md-surface);
 }
 
 .scanner-viewport {
@@ -42,12 +29,12 @@
   border: 0;
 }
 
-/* White brackets marking the area the code has to be placed in. */
+/* Białe narożniki wyznaczające obszar skanowania. */
 .scan-frame {
   position: absolute;
   top: 50%;
   left: 50%;
-  width: min(240px, 60%);
+  width: min(240px, 70%);
   aspect-ratio: 1;
   transform: translate(-50%, -50%);
   pointer-events: none;
@@ -57,7 +44,7 @@
   position: absolute;
   width: 28px;
   height: 28px;
-  border: 3px solid #fff;
+  border: 3px solid #ffffff;
 }
 
 .top-left {
@@ -85,11 +72,11 @@
 }
 
 .bottom-right {
-  right: 0;
   bottom: 0;
+  right: 0;
   border-left: 0;
   border-top: 0;
-  border-radius: 0 0 8px;
+  border-radius: 0 0 8px 0;
 }
 
 .scanner-hint,
@@ -101,8 +88,8 @@
   justify-content: center;
   margin: 0;
   padding: 24px;
-  color: #fff;
-  font-size: 14px;
+  color: #ffffff;
+  font-size: 12px;
 }
 
 .scanner-hint {
@@ -111,14 +98,23 @@
 
 .scanner-error {
   position: static;
-  color: #b91c1c;
-  font-size: 14px;
-  line-height: 1.5;
+  color: var(--md-danger);
+  line-height: 1.6;
+  text-align: center;
 }
 
-.instruction {
-  margin: 0;
+.scanner-caption {
+  margin-top: 32px;
+  color: var(--md-text);
   font-size: 16px;
-  line-height: 1.5;
-  color: #111827;
+  font-weight: 500;
+  line-height: 1.4;
+  text-align: center;
+}
+
+.scanner-account {
+  margin-top: 12px;
+  color: var(--md-text-light);
+  font-size: 12px;
+  text-align: center;
 }

@@ -1,1 +1,189 @@
-<p>record-detail works!</p>
+<app-top-bar [title]="title() || 'Nowe badanie'" [actionLabel]="saveLabel()" (action)="save()" />
+
+<div class="page">
+  <div class="field">
+    <span class="field__label">Tytuł</span>
+    <input
+      class="input"
+      type="text"
+      placeholder="Tytuł badania"
+      [value]="title()"
+      (input)="onInput($event, 'title')"
+    />
+  </div>
+
+  <div class="field">
+    <span class="field__label">Opis</span>
+    <input
+      class="input"
+      type="text"
+      placeholder="Insert description"
+      [value]="description()"
+      (input)="onInput($event, 'description')"
+    />
+  </div>
+
+  <div class="field">
+    <span class="field__label">Lekarz</span>
+    <input
+      class="input"
+      type="text"
+      placeholder="Imię i nazwisko lekarza"
+      [value]="doctor()"
+      (input)="onInput($event, 'doctor')"
+    />
+  </div>
+
+  <div class="field">
+    <span class="field__label">Data badania</span>
+    <button type="button" class="field--icon date-field" (click)="calendarOpen.set(true)">
+      <span>{{ date() }}</span>
+      <svg viewBox="0 0 24 24" aria-hidden="true">
+        <rect x="3.5" y="5.5" width="17" height="15" rx="2" />
+        <path d="M3.5 10h17M8 3.5v4M16 3.5v4" />
+      </svg>
+    </button>
+  </div>
+
+  <div class="field">
+    <span class="field__label">Tagi</span>
+    <div class="badges">
+      @for (tag of tags(); track tag) {
+        <span
+          class="badge"
+          [style.background]="tagColor(tag).bg"
+          [style.color]="tagColor(tag).text"
+        >
+          {{ tag }}
+          <button
+            type="button"
+            class="badge__remove"
+            [attr.aria-label]="'Usuń tag ' + tag"
+            (click)="removeTag(tag)"
+          >
+            ×
+          </button>
+        </span>
+      }
+
+      <button
+        type="button"
+        class="badge--add"
+        (click)="toggleTagPicker()"
+        aria-label="Dodaj tag"
+        title="Dodaj tag"
+      >
+        +
+      </button>
+    </div>
+
+    @if (tagPickerOpen()) {
+      <div class="tag-picker">
+        <span class="tag-picker__label">Wybierz lub utwórz tag</span>
+        <div class="badges" style="margin-bottom: 8px">
+          @for (tag of knownTags; track tag) {
+            <button
+              type="button"
+              class="badge"
+              [style.background]="tagColor(tag).bg"
+              [style.color]="tagColor(tag).text"
+              (click)="addTag(tag)"
+            >
+              + {{ tag }}
+            </button>
+          }
+        </div>
+
+        <div class="btn-row">
+          <input
+            class="input"
+            type="text"
+            placeholder="Wpisz nową nazwę..."
+            [value]="newTag()"
+            (input)="onNewTag($event)"
+            (keydown.enter)="addTag(newTag())"
+          />
+          <button type="button" class="btn btn--sm" (click)="addTag(newTag())">Dodaj</button>
+        </div>
+      </div>
+    }
+  </div>
+
+  <div class="field">
+    <span class="field__label">Notatki</span>
+    <textarea
+      class="textarea"
+      rows="4"
+      placeholder="Treść notatki z wizyty"
+      [value]="notes()"
+      (input)="onInput($event, 'notes')"
+    ></textarea>
+  </div>
+
+  @if (attachments().length > 0) {
+    <div class="field">
+      <span class="field__label">Załączniki ({{ attachments().length }})</span>
+      <div class="stack">
+        @for (file of attachments(); track file) {
+          <div class="attachment">
+            <span class="attachment__icon" aria-hidden="true">
+              <svg viewBox="0 0 24 24">
+                <path d="M7 3h7l5 5v13a1 1 0 0 1-1 1H7a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1z" />
+                <path d="M14 3v5h5" />
+              </svg>
+            </span>
+            <span class="attachment__name">{{ file }}</span>
+            <button
+              type="button"
+              class="attachment__remove"
+              [attr.aria-label]="'Usuń ' + file"
+              (click)="removeAttachment(file)"
+            >
+              ×
+            </button>
+          </div>
+        }
+      </div>
+    </div>
+  }
+
+  @if (!isNew()) {
+    <button type="button" class="danger-link" (click)="remove()">Usuń to badanie</button>
+  }
+
+  <div class="spacer-bottom"></div>
+
+  <!-- FAB: menu załączników -->
+  <div class="fab-wrap">
+    @if (fabMenuOpen()) {
+      <div class="fab-menu">
+        <label class="fab-menu__item">
+          <input type="file" multiple hidden (change)="addFiles($event)" />
+          Wgraj plik
+        </label>
+      </div>
+    }
+
+    <button
+      type="button"
+      class="fab"
+      style="position: static"
+      (click)="toggleFabMenu()"
+      [attr.aria-label]="fabMenuOpen() ? 'Zamknij menu' : 'Dodaj załącznik'"
+    >
+      @if (fabMenuOpen()) {
+        <svg viewBox="0 0 24 24" aria-hidden="true">
+          <path d="M6 6l12 12M18 6L6 18" />
+        </svg>
+      } @else {
+        <svg viewBox="0 0 24 24" aria-hidden="true">
+          <path d="M12 5v14M5 12h14" />
+        </svg>
+      }
+    </button>
+  </div>
+</div>
+
+@if (calendarOpen()) {
+  <app-date-picker [(value)]="date" (closed)="calendarOpen.set(false)" />
+}

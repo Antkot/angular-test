@@ -1,14 +1,10 @@
-<!-- auth-select.html -->
-<main class="account-selection">
-  <header class="account-selection__header">
-    <h1>Wybierz konto</h1>
-    <p>Zaloguj się istniejącym kontem albo załóż nowe - jako Senior lub Opiekun.</p>
-  </header>
+<div class="page page--tight">
+  <h1 class="page-title">Wybierz konto</h1>
 
   @if (isLoading()) {
-    <p class="account-selection__empty">Ładowanie kont...</p>
+    <p class="hint">Ładowanie kont...</p>
   } @else {
-    <section class="account-selection__grid" aria-label="Dostępne konta">
+    <div class="account-grid">
       @for (account of accounts(); track account.id) {
         <button
           type="button"
@@ -18,87 +14,107 @@
             'Zaloguj jako: ' + account.firstName + ' ' + account.lastName + ' (' + account.role + ')'
           "
         >
-          <span class="account-tile__avatar" aria-hidden="true">{{ account.initials }}</span>
-          <span class="account-tile__name">
-            {{ account.firstName }} {{ account.lastName }}
+          <span
+            class="account-tile__avatar"
+            [style.background]="avatar(account.id).bg"
+            [style.border-color]="avatar(account.id).border"
+            [style.color]="avatar(account.id).text"
+            aria-hidden="true"
+          >
+            {{ account.initials }}
           </span>
-          <span class="account-tile__role">
+          <span class="account-tile__name">{{ account.firstName }} {{ account.lastName }}</span>
+          <span class="account-tile__sub">
             {{ account.role === 'caregiver' ? 'Opiekun' : 'Senior' }}
           </span>
         </button>
-      } @empty {
-        <p class="account-selection__empty">Brak dostępnych kont.</p>
       }
 
       <button
-        class="account-tile account-tile--add"
         type="button"
+        class="account-tile"
         (click)="openAddModal()"
         aria-label="Dodaj nowe konto"
       >
-        <span class="account-tile__avatar" aria-hidden="true">+</span>
+        <span class="account-tile__avatar account-tile__avatar--dashed" aria-hidden="true">+</span>
         <span class="account-tile__name">Nowy użytkownik</span>
       </button>
-    </section>
+    </div>
   }
+</div>
 
-  @if (isAddModalOpen()) {
-    <div
-      class="account-modal-backdrop"
-      role="presentation"
-      (click)="closeOnBackdrop($event)"
-      (keydown.escape)="closeAddModal()"
-    >
-      <section
-        class="account-modal"
-        role="dialog"
-        aria-modal="true"
-        aria-labelledby="account-modal-title"
-      >
-        <h2 id="account-modal-title">Nowe konto</h2>
+@if (isAddModalOpen()) {
+  <div
+    class="modal-backdrop"
+    role="presentation"
+    (click)="closeOnBackdrop($event)"
+    (keydown.escape)="closeAddModal()"
+  >
+    <section class="modal" role="dialog" aria-modal="true" aria-labelledby="account-modal-title">
+      <h2 class="modal__title" id="account-modal-title">Nowe konto</h2>
 
-        @if (addMode() === 'choice') {
-          <div class="account-modal__choices">
-            <p>Jakiego rodzaju jest to konto?</p>
-            <button type="button" (click)="chooseRole('senior')">Senior (pacjent)</button>
-            <button type="button" (click)="chooseRole('caregiver')">Opiekun</button>
-          </div>
-        } @else {
-          <form (submit)="createAccount($event)">
-            <p>
-              Rejestrujesz się jako:
-              <strong>{{ addMode() === 'caregiver' ? 'Opiekun' : 'Senior' }}</strong>
-            </p>
+      @if (addMode() === 'choice') {
+        <p class="hint">Jakiego rodzaju jest to konto?</p>
+        <div class="stack" style="margin-top: 12px">
+          <button type="button" class="btn btn--block" (click)="chooseRole('senior')">
+            Senior (pacjent)
+          </button>
+          <button type="button" class="btn btn--ghost btn--block" (click)="chooseRole('caregiver')">
+            Opiekun
+          </button>
+        </div>
+      } @else {
+        <form (submit)="createAccount($event)">
+          <p class="hint" style="margin-bottom: 12px">
+            Rejestrujesz się jako:
+            <strong>{{ addMode() === 'caregiver' ? 'Opiekun' : 'Senior' }}</strong>
+          </p>
 
-            <label for="firstName">Imię</label>
-            <input id="firstName" name="firstName" type="text" autocomplete="given-name" required />
-
-            <label for="lastName">Nazwisko</label>
-            <input id="lastName" name="lastName" type="text" autocomplete="family-name" required />
-
-            <label for="email">E-mail (opcjonalnie)</label>
+          <div class="field">
+            <span class="field__label">Imię</span>
             <input
-              id="email"
+              class="input"
+              name="firstName"
+              type="text"
+              autocomplete="given-name"
+              required
+            />
+          </div>
+
+          <div class="field">
+            <span class="field__label">Nazwisko</span>
+            <input
+              class="input"
+              name="lastName"
+              type="text"
+              autocomplete="family-name"
+              required
+            />
+          </div>
+
+          <div class="field">
+            <span class="field__label">E-mail (opcjonalnie)</span>
+            <input
+              class="input"
               name="email"
               type="email"
               autocomplete="email"
-              placeholder="jan.kowalski@example.com"
+              placeholder="jan.kowalski@gmail.com"
             />
+          </div>
 
-            <button type="submit">Utwórz konto</button>
-            <button type="button" (click)="addMode.set('choice')">Zmień rolę</button>
-          </form>
-        }
+          <div class="btn-row" style="margin-top: 16px">
+            <button type="submit" class="btn" style="flex: 1">Utwórz konto</button>
+            <button type="button" class="btn btn--ghost" (click)="addMode.set('choice')">
+              Zmień rolę
+            </button>
+          </div>
+        </form>
+      }
 
-        <button
-          class="account-modal__close"
-          type="button"
-          (click)="closeAddModal()"
-          aria-label="Zamknij okno"
-        >
-          Zamknij
-        </button>
-      </section>
-    </div>
-  }
-</main>
+      <button class="modal__close" type="button" (click)="closeAddModal()" aria-label="Zamknij okno">
+        Zamknij
+      </button>
+    </section>
+  </div>
+}
