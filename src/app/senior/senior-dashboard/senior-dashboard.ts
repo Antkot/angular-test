@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Database } from '../../services/database';
 import { MedicalRecord } from '../../models/app.models';
@@ -15,7 +15,10 @@ export class SeniorDashboard implements OnInit {
   public records: MedicalRecord[] = [];
   public isLoading: boolean = true;
 
-  constructor(private database: Database) { }
+  constructor(
+    private database: Database,
+    private cdr: ChangeDetectorRef // <-- 1. Wstrzykujemy mechanizm kontroli zmian
+  ) { }
 
   ngOnInit(): void {
     console.log('2. ngOnInit wywołane, wysyłam zapytanie do serwisu...');
@@ -24,11 +27,14 @@ export class SeniorDashboard implements OnInit {
       next: (data: MedicalRecord[]) => {
         console.log('3. SUKCES! Dane pobrane:', data);
         this.records = data;
-        this.isLoading = false; // <-- To wyłącza stan ładowania
+        this.isLoading = false;
+
+        this.cdr.detectChanges(); // <-- 2. Kategorycznie wymuszamy odświeżenie widoku HTML!
       },
       error: (err: any) => {
         console.error('Błąd pobierania danych:', err);
         this.isLoading = false;
+        this.cdr.detectChanges();
       }
     });
   }
