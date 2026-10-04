@@ -1,0 +1,6 @@
+{
+  "name": "DocuMed - Moje Badania",
+  "description": "Mobilna aplikacja do zarządzania badaniami i historią medyczną oraz weryfikacji i udostępniania danych bliskim.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
